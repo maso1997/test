@@ -1,0 +1,125 @@
+/* Modal backdrop with blur */
+.modal {
+  display: block;
+  background: rgba(0, 0, 0, 0.5); /* Dark background for modal */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 999; /* Make sure the modal backdrop is above other elements */
+  justify-content: center;
+  align-items: center;
+}
+
+/* Modal dialog positioning */
+.modal-dialog-centered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%; /* Ensure modal is centered vertically */
+}
+
+/* Modal content */
+.modal-content {
+  padding: 20px;
+  border-radius: 8px;
+}
+
+/* Modal header styling */
+.modal-header {
+  background-color: #f8f9fa;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Modal footer styling */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 10px;
+}
+
+/* Close button styling */
+.btn-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+}
+
+/* Input and textarea fields styling inside the modal */
+.modal-body input,
+.modal-body textarea {
+  margin-bottom: 15px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  box-sizing: border-box;
+}
+
+/* Primary button styling */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  color: white;
+}
+
+
+
+/* Custom button styling */
+.btn-custom {
+  background-color: white; /* Green background */
+  border: 1px solid #ad0f21; /* Darker green border */
+  color: black; /* White text */
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Add shadow effect */
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  float: right; /* Align the button to the right */
+}
+
+.btn-custom:hover {
+  background-color: #ca1414; /* Darker green on hover */
+  border-color: #100f0f; /* Slightly darker border */
+  color: white;
+}
+
+/* Backdrop and blur effect */
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px); /* Apply blur effect */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999; /* Ensure the backdrop is above other content */
+}
+
+/* Dialog styling for modal */
+.dialog {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 1000;
+  position: relative;
+  max-width: 500px;
+  width: 100%;
+}
+.modal-dialog-centered {
+  height: 80%; /* Augmentez la hauteur du modal */
+  max-height: 80%; /* Limite la hauteur à 80% de la fenêtre */
+  align-items: center;
+  justify-content: center;
+
+}
+
+.modal-content {
+  max-height: 100%; /* Assurez-vous que le contenu du modal occupe toute la hauteur disponible */
+  overflow-y: auto; /* Ajoutez un défilement vertical si le contenu dépasse */
+  min-width: 600px;
+}

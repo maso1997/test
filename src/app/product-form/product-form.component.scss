@@ -1,0 +1,9 @@
+input:focus, textarea:focus, select:focus {
+    border-color: black !important; 
+    box-shadow: 0 0 0 0.2rem rgba(0, 0, 255, 0.25); 
+  }
+  
+  input, textarea, select {
+    transition: border-color 0.3s, box-shadow 0.2s;  
+  }
+  

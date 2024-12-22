@@ -1,0 +1,107 @@
+<!-- Ajouter le lien Font Awesome pour les icônes -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-body">
+      <button class="btn btn-custom" (click)="openAddRiskDialog()">Ajouter un risque</button>
+
+      <h3 class="card-title mb-3">Liste des Risques</h3>
+
+      <table class="table mt-4">
+        <thead>
+          <tr>
+            <th>Risque</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Personne Responsable</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let risk of risks">
+            <td>{{ risk.name }}</td>
+            <td>{{ risk.description }}</td>
+            <td>{{ risk.type }}</td>
+            <td>{{ risk.responsiblePerson }}</td>
+            <td>
+              <button class="btn btn-war" (click)="openEditRiskDialog(risk)">
+                <i class="fas fa-edit"></i> <!-- Icône Modifier -->
+              </button>
+              <button class="btn btn-dang" (click)="confirmDeleteRisk(risk)">
+                <i class="fas fa-trash-alt"></i> <!-- Icône Supprimer -->
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Add/Edit Risk -->
+<div *ngIf="showDialog" class="modal-overlay" (click)="closeDialog($event)">
+  <div class="modal d-block" tabindex="-1" role="dialog" (click)="$event.stopPropagation()">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{{ dialogTitle }}</h5>
+          <button type="button" class="btn-close" (click)="closeDialog()" >X</button>
+        </div>
+        <div class="modal-body">
+          <form (ngSubmit)="saveRisk(selectedRisk)">
+            <div class="mb-3">
+              <label for="name" class="form-label">Nom du risque</label>
+              <input
+                type="text"
+                id="name"
+                class="form-control"
+                [(ngModel)]="selectedRisk.name"
+                name="name"
+                placeholder="Entrez le nom du risque"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="description" class="form-label">Description</label>
+              <textarea
+                id="description"
+                class="form-control"
+                [(ngModel)]="selectedRisk.description"
+                name="description"
+                placeholder="Entrez la description du risque"
+                required
+              ></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="type" class="form-label">Type de risque</label>
+              <input
+                type="text"
+                id="type"
+                class="form-control"
+                [(ngModel)]="selectedRisk.type"
+                name="type"
+                placeholder="Entrez le type de risque"
+                required
+              />
+            </div>
+            <div class="mb-3">
+              <label for="responsiblePerson" class="form-label">Personne responsable</label>
+              <input
+                type="text"
+                id="responsiblePerson"
+                class="form-control"
+                [(ngModel)]="selectedRisk.responsiblePerson"
+                name="responsiblePerson"
+                placeholder="Entrez le nom de la personne responsable"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="!selectedRisk.name || !selectedRisk.description || !selectedRisk.type || !selectedRisk.responsiblePerson">Enregistrer</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
