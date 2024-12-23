@@ -1,0 +1,62 @@
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="container mt-4">
+  <div class="card shadow">
+    <div class="card-body">
+      <h3 class="card-title mb-3 
+
+      ">Rapport des Risques</h3>
+  
+      <table class="table mt-4">
+        <thead>
+          <tr>
+            <th>Risque</th>
+            <th>Description</th>
+            <th>Type</th>
+            <th>Personne Responsable</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let risk of risks">
+            <td>{{ risk.name }}</td>
+            <td>{{ risk.description }}</td>
+            <td>{{ risk.type }}</td>
+            <td>{{ risk.responsiblePerson }}</td>
+            <td>
+              <!-- Icône de visualisation -->
+              <button class="btn " (click)="viewRiskDetails(risk)">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="btn " (click)="downloadRiskPDF(risk)">
+                <i class="fas fa-download"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Détails -->
+<div *ngIf="showDetailsModal" class="modal-overlay" (click)="closeDetailsModal()">
+  <div class="modal d-block" tabindex="-1" role="dialog" (click)="$event.stopPropagation()">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Détails du Risque</h5>
+          <button type="button" class="btn-close" (click)="closeDetailsModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Nom du risque:</strong> {{ selectedRisk.name }}</p>
+          <p><strong>Description:</strong> {{ selectedRisk.description }}</p>
+          <p><strong>Type:</strong> {{ selectedRisk.type }}</p>
+          <p><strong>Personne Responsable:</strong> {{ selectedRisk.responsiblePerson }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

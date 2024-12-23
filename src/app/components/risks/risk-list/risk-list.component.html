@@ -37,6 +37,7 @@
       </table>
     </div>
   </div>
+
 </div>
 
 <!-- Modal Add/Edit Risk -->
@@ -84,6 +85,7 @@
                 placeholder="Entrez le type de risque"
                 required
               />
+              
             </div>
             <div class="mb-3">
               <label for="responsiblePerson" class="form-label">Personne responsable</label>
@@ -96,12 +98,15 @@
                 placeholder="Entrez le nom de la personne responsable"
                 required
               />
+              
             </div>
             <button type="submit" class="btn btn-primary" [disabled]="!selectedRisk.name || !selectedRisk.description || !selectedRisk.type || !selectedRisk.responsiblePerson">Enregistrer</button>
           </form>
         </div>
       </div>
     </div>
+
   </div>
+
 </div>
 

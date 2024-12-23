@@ -10,11 +10,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { ReportComponent } from './components/report/report.component';
+import { RiskService } from './services/risk.service';
 @NgModule({
   declarations: [
     AppComponent,
     ProductFormComponent,
     RiskListComponent,
+    ReportComponent,
     
   ],
   imports: [
@@ -29,7 +32,7 @@ import { MatInputModule } from '@angular/material/input';
     FormsModule
     
   ],
-  providers: [],
+  providers: [RiskService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
