@@ -1,9 +1,9 @@
-<!-- Ajouter le lien Font Awesome pour les icônes -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 
 <div class="container mt-4">
   <div class="card shadow">
     <div class="card-body">
+      <app-table-filter (filterChange)="applyFilters($event)"></app-table-filter>
       <button class="btn btn-custom" (click)="openAddRiskDialog()">Ajouter un risque</button>
 
       <h3 class="card-title mb-3">Liste des Risques</h3>
@@ -19,17 +19,17 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let risk of risks">
+          <tr *ngFor="let risk of filteredRisks">
             <td>{{ risk.name }}</td>
             <td>{{ risk.description }}</td>
             <td>{{ risk.type }}</td>
             <td>{{ risk.responsiblePerson }}</td>
             <td>
               <button class="btn btn-war" (click)="openEditRiskDialog(risk)">
-                <i class="fas fa-edit"></i> <!-- Icône Modifier -->
+                <i class="fas fa-edit"></i>
               </button>
               <button class="btn btn-dang" (click)="confirmDeleteRisk(risk)">
-                <i class="fas fa-trash-alt"></i> <!-- Icône Supprimer -->
+                <i class="fas fa-trash-alt"></i>
               </button>
             </td>
           </tr>
@@ -37,7 +37,6 @@
       </table>
     </div>
   </div>
-
 </div>
 
 <!-- Modal Add/Edit Risk -->
@@ -85,7 +84,6 @@
                 placeholder="Entrez le type de risque"
                 required
               />
-              
             </div>
             <div class="mb-3">
               <label for="responsiblePerson" class="form-label">Personne responsable</label>
@@ -98,15 +96,11 @@
                 placeholder="Entrez le nom de la personne responsable"
                 required
               />
-              
             </div>
             <button type="submit" class="btn btn-primary" [disabled]="!selectedRisk.name || !selectedRisk.description || !selectedRisk.type || !selectedRisk.responsiblePerson">Enregistrer</button>
           </form>
         </div>
       </div>
     </div>
-
   </div>
-
 </div>
-

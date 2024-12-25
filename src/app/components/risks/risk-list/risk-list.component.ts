@@ -9,15 +9,22 @@ import { RiskService } from 'src/app/services/risk.service';
 })
 export class RiskListComponent {
   risks: any[] = [];
-
+  filteredRisks: any[] = [];
   selectedRisk: any = null;
   showDialog = false;
   dialogTitle = '';
+  filters = {
+    name: '',
+    description: '',
+    type: '',
+    responsiblePerson: ''
+  };
 
   constructor(private riskService: RiskService, private router: Router) {
     // Souscrire aux risques observables du service
     this.riskService.risks$.subscribe(risks => {
       this.risks = risks;
+      this.filteredRisks = risks;
     });
   }
 
@@ -61,6 +68,17 @@ export class RiskListComponent {
     } else {
       this.showDialog = false;
     }
+  }
+
+  // Appliquer les filtres
+  applyFilters(filters: any) {
+    this.filters = filters;
+    this.filteredRisks = this.risks.filter(risk => 
+      (this.filters.name ? risk.name.includes(this.filters.name) : true) &&
+      (this.filters.description ? risk.description.includes(this.filters.description) : true) &&
+      (this.filters.type ? risk.type.includes(this.filters.type) : true) &&
+      (this.filters.responsiblePerson ? risk.responsiblePerson.includes(this.filters.responsiblePerson) : true)
+    );
   }
 
   // Naviguer vers la page du rapport

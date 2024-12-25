@@ -12,12 +12,15 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReportComponent } from './components/report/report.component';
 import { RiskService } from './services/risk.service';
+import { TableFilterComponent } from './components/table-filter/table-filter.component';
 @NgModule({
   declarations: [
     AppComponent,
     ProductFormComponent,
     RiskListComponent,
     ReportComponent,
+    TableFilterComponent,
+    
     
   ],
   imports: [

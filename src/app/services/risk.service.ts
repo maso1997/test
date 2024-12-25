@@ -1,5 +1,3 @@
-// src/app/services/risk.service.ts
-
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
@@ -7,29 +5,32 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class RiskService {
-  // Utilisation de BehaviorSubject pour garder la trace des risques et les rendre observables
+  // BehaviorSubject to store the current list of risks
   private risksSource = new BehaviorSubject<any[]>([
-    { name: 'Risque 1', description: 'Description 1', type: 'Type 1', responsiblePerson: 'Personne 1' },
-    { name: 'Risque 2', description: 'Description 2', type: 'Type 2', responsiblePerson: 'Personne 2' },
+
   ]);
-  risks$ = this.risksSource.asObservable();
+  risks$ = this.risksSource.asObservable(); // Expose risks$ as an observable
 
-  constructor() { }
-
-  // Méthode pour mettre à jour la liste des risques
-  updateRisks(risks: any[]) {
-    this.risksSource.next(risks);
+  // Méthode pour récupérer tous les risques
+  getRisks(): any[] {
+    return this.risksSource.getValue();
   }
 
   // Méthode pour ajouter un risque
   addRisk(risk: any) {
-    const currentRisks = this.risksSource.value;
+    const currentRisks = this.risksSource.getValue();
     this.risksSource.next([...currentRisks, risk]);
   }
 
-  // Méthode pour supprimer un risque
-  deleteRisk(risk: any) {
-    const updatedRisks = this.risksSource.value.filter(r => r !== risk);
+  // Méthode pour mettre à jour les risques
+  updateRisks(updatedRisks: any[]) {
     this.risksSource.next(updatedRisks);
+  }
+
+  // Méthode pour supprimer un risque
+  deleteRisk(riskToDelete: any) {
+    const currentRisks = this.risksSource.getValue();
+    const filteredRisks = currentRisks.filter(risk => risk.name !== riskToDelete.name);
+    this.risksSource.next(filteredRisks);
   }
 }
