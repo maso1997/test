@@ -1,0 +1,50 @@
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: black !important;
+  box-shadow: 0 0 0 0.2rem rgba(0, 0, 255, 0.25);
+}
+
+input,
+textarea,
+select {
+  transition: border-color 0.3s, box-shadow 0.2s;
+}
+
+.table {
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.table th, .table td {
+    border: 1px solid #dee2e6; /* Optional: Ensure the table cells have a border */
+  }
+
+  .table th{
+    background-color: #97000f; 
+  }
+   
+
+.table th,
+.table td {
+  vertical-align: middle;
+  text-align: center;
+}
+
+.table thead input {
+    width: 100%;
+    padding: 0.5rem;
+    box-sizing: border-box;
+  }
+  
+  .table thead th {
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  .card-title {
+    font-size: 2rem;  /* Increase the font size */
+     /* Make the text bold */
+  }

@@ -1,0 +1,112 @@
+<div class="container mt-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h3 class="card-title mb-3 ">Validation Grid</h3>
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-dark">
+              <!-- Filter Input Row -->
+              <tr>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Branch/Department"
+                    [(ngModel)]="filters.branch"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Approver"
+                    [(ngModel)]="filters.approver"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Opinion"
+                    [(ngModel)]="filters.opinion"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Condition ID"
+                    [(ngModel)]="filters.conditionId"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Category"
+                    [(ngModel)]="filters.category"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Comments/Conditions"
+                    [(ngModel)]="filters.comments"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Responsible to Implement Condition"
+                    [(ngModel)]="filters.responsible"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+                <th>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Target / Date"
+                    [(ngModel)]="filters.targetDate"
+                    (ngModelChange)="applyFilters()"
+                  />
+                </th>
+              </tr>
+              <!-- Column Name Row -->
+              <tr>
+                <th>Branch/Department</th>
+                <th>Approver</th>
+                <th>Opinion</th>
+                <th>Condition ID</th>
+                <th>Category</th>
+                <th>Comments/Conditions</th>
+                <th>Responsible to Implement Condition</th>
+                <th>Target / Date (weeks after trade date)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of filteredData">
+                <td>{{ item.branch }}</td>
+                <td>{{ item.approver }}</td>
+                <td>{{ item.opinion }}</td>
+                <td>{{ item.conditionId }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.comments }}</td>
+                <td>{{ item.responsible }}</td>
+                <td>{{ item.targetDate }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  

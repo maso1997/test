@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { ReportComponent } from './components/report/report.component';
 import { RiskService } from './services/risk.service';
 import { TableFilterComponent } from './components/table-filter/table-filter.component';
+import { ValidationGridComponent } from './components/validation-grid/validation-grid.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -20,6 +21,7 @@ import { TableFilterComponent } from './components/table-filter/table-filter.com
     RiskListComponent,
     ReportComponent,
     TableFilterComponent,
+    ValidationGridComponent,
     
     
   ],
