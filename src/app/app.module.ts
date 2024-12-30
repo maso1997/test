@@ -14,6 +14,7 @@ import { ReportComponent } from './components/report/report.component';
 import { RiskService } from './services/risk.service';
 import { TableFilterComponent } from './components/table-filter/table-filter.component';
 import { ValidationGridComponent } from './components/validation-grid/validation-grid.component';
+import { ProductValidationGridComponent } from './components/product-validation-grid/product-validation-grid.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -22,6 +23,7 @@ import { ValidationGridComponent } from './components/validation-grid/validation
     ReportComponent,
     TableFilterComponent,
     ValidationGridComponent,
+    ProductValidationGridComponent,
     
     
   ],

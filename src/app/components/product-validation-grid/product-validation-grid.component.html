@@ -1,0 +1,36 @@
+<div class="container mt-4">
+    <div class="card shadow">
+      <div class="card-body">
+        <h3 class="card-title mb-3">Product Validation Grid</h3>
+  
+        <div class="table-responsive">
+          <table class="table table-bordered">
+            <thead class="table-dark">
+              <tr>
+                <!-- Filter Inputs in a Row -->
+                <th *ngFor="let column of tableColumns">
+                  <input
+                    type="text"
+                    class="form-control"
+                    [(ngModel)]="filters[productKeys[tableColumns.indexOf(column)]]"
+                    (input)="applyFilters()"
+                    placeholder="Filter by {{ column }}"
+                  />
+                </th>
+              </tr>
+              <!-- Column Headers -->
+              <tr>
+                <th *ngFor="let column of tableColumns">{{ column }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let product of filteredProducts">
+                <td *ngFor="let key of productKeys">{{ product[key] }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+  
