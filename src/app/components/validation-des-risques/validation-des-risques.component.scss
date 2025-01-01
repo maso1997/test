@@ -1,0 +1,85 @@
+/* Center the modals */
+.modal-dialog-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  
+  /* Table Styling */
+  .table {
+      border-collapse: collapse;
+      font-size: 1rem; /* Slightly increased font size */
+      border-radius: 10px;
+      overflow: hidden;
+  }
+  
+  .table th, .table td {
+      border: 1px solid #dee2e6;
+  }
+  
+  .table th {
+      background-color: #97000f;
+      color: white;
+      padding: 0.75rem;
+  }
+  
+  .table th, .table td {
+      vertical-align: middle;
+      text-align: center;
+  }
+  
+  /* Focus effect for inputs in table headers */
+  .table thead input:focus,
+  .table thead select:focus {
+      border-color: black !important;
+      box-shadow: 0 0 0 0.2rem rgba(0, 0, 255, 0.25);
+  }
+  
+  /* Styling for table inputs and selects */
+  .table thead input,
+  .table thead select {
+      width: 100%;
+      padding: 0.5rem;
+      box-sizing: border-box;
+  }
+  
+  /* Increase font size for card titles */
+  .card-title {
+      font-size: 2rem;
+      font-weight: bold;
+  }
+  
+  /* Table header cell content alignment */
+  .table th,
+  .table td {
+      text-align: center;
+  }
+  
+  /* Ensure modal content is well-spaced */
+  .modal-body {
+      padding: 1rem;
+  }
+  
+  /* Modal size */
+.modal-dialog {
+    max-width: 60%; 
+    max-height: 100%; /* or any percentage of your choice */
+}
+
+.modal-dialog-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Optionally, customize the size of specific modals */
+#risqueModal .modal-dialog {
+    max-width: 60%; 
+    max-height: 100%; /* Larger modal size */
+}
+
+#viewRisqueModal .modal-dialog {
+    max-width: 60%; 
+    max-height: 100%;  /* Medium size modal */
+}

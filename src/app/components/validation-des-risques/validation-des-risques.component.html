@@ -1,0 +1,111 @@
+<!-- Tableau des risques -->
+<div class="container mt-5">
+    <h1 class="text-center">Validation des Risques</h1>
+    <table class="table table-bordered table-striped mt-4">
+        <thead class="table-dark">
+            <tr>
+                <th>DNP</th>
+                <th>Status</th>
+                <th>Périmètre</th>
+                <th>Risque</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let risque of risques; let i = index">
+                <td>{{ risque.dnp }}</td>
+                <td>{{ risque.status }}</td>
+                <td>{{ risque.perimetre }}</td>
+                <td>
+                    <button 
+                        *ngIf="!risque.type" 
+                        class="btn btn-danger btn-sm me-2" 
+                        title="ajouterUnRisque" 
+                        (click)="openModal(i)">
+                        Ajouter un risque
+                    </button>
+                    <span *ngIf="risque.type" >{{ risque.type }}</span>
+                </td>
+                <td class="text-center">
+                    <!-- Bouton Visualiser -->
+                    <button 
+                        class="btn btn-secondary btn-sm me-2" 
+                        title="Visualiser" 
+                        (click)="openViewModal(risque)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                    <!-- Bouton Modifier -->
+                    <button 
+                        class="btn btn-warning btn-sm" 
+                        title="Modifier" 
+                        (click)="openModal(i)">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal pour créer / modifier un risque -->
+<div class="modal fade" id="risqueModal" tabindex="-1" aria-labelledby="risqueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="risqueModalLabel">Ajouter un Risque</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <!-- Type de risque -->
+                    <div class="mb-3">
+                        <label for="typeRisque" class="form-label">Type de Risque</label>
+                        <select id="typeRisque" class="form-select" [(ngModel)]="selectedType" name="typeRisque" (change)="updateOptions()">
+                            <option value="A">Type A</option>
+                            <option value="B">Type B</option>
+                            <option value="C">Type C</option>
+                        </select>
+                    </div>
+
+                    <!-- Options dynamiques -->
+                    <div class="mb-3">
+                        <label class="form-label">Options</label>
+                        <div *ngFor="let option of dynamicOptions">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" [id]="option" [value]="option" [checked]="selectedOptions.includes(option)" (change)="toggleOption(option)">
+                                <label class="form-check-label" [for]="option">
+                                    {{ option }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton Enregistrer -->
+                    <button type="button" class="btn btn-primary" (click)="submitRisque()" [disabled]="!isOptionSelected()">Enregistrer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour Visualiser un Risque -->
+<div class="modal fade" id="viewRisqueModal" tabindex="-1" aria-labelledby="viewRisqueModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewRisqueModalLabel">Détails du Risque</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>DNP:</strong> {{ selectedRisque?.dnp }}</p>
+                <p><strong>Status:</strong> {{ selectedRisque?.status }}</p>
+                <p><strong>Périmètre:</strong> {{ selectedRisque?.perimetre }}</p>
+                <p><strong>Type de risque :</strong> {{ selectedRisque?.type }}</p>
+                <p><strong>Options de risque:</strong></p>
+                <ul>
+                    <li *ngFor="let option of selectedRisque?.options">{{ option }}</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

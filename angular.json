@@ -32,9 +32,15 @@
             "styles": [
               "@angular/material/prebuilt-themes/indigo-pink.css",
               "src/styles.scss",
-              "node_modules/bootstrap/scss/bootstrap.scss"
+              "node_modules/bootstrap/scss/bootstrap.scss",
+              "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"
+            ]
+
+
+
           },
           "configurations": {
             "production": {
@@ -107,4 +113,6 @@
   "cli": {
     "analytics": "13428f2e-5233-4121-83aa-6d15196c9f4b"
   }
+
+  
 }

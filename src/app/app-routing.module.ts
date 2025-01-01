@@ -5,6 +5,7 @@ import { RiskListComponent } from './components/risks/risk-list/risk-list.compon
 import { ReportComponent } from './components/report/report.component';
 import { ValidationGridComponent } from './components/validation-grid/validation-grid.component'; // Import ValidationGridComponent
 import { ProductValidationGridComponent } from './components/product-validation-grid/product-validation-grid.component';
+import { ValidationDesRisquesComponent } from './components/validation-des-risques/validation-des-risques.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'product-form', pathMatch: 'full' },
@@ -12,7 +13,9 @@ const routes: Routes = [
   { path: 'risk-list', component: RiskListComponent },
   { path: 'report', component: ReportComponent },
   { path: 'validation-grid', component: ValidationGridComponent },
-  { path: 'product-grid', component: ProductValidationGridComponent },// Add the route
+  { path: 'product-grid', component: ProductValidationGridComponent },
+  { path: 'validation-risques', component: ValidationDesRisquesComponent },
+  // Add the route
 ];
 
 @NgModule({
