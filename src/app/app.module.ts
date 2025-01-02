@@ -16,6 +16,10 @@ import { TableFilterComponent } from './components/table-filter/table-filter.com
 import { ValidationGridComponent } from './components/validation-grid/validation-grid.component';
 import { ProductValidationGridComponent } from './components/product-validation-grid/product-validation-grid.component';
 import { ValidationDesRisquesComponent } from './components/validation-des-risques/validation-des-risques.component';
+import { StepperComponent } from './components/stepper/stepper.component';
+import { NbThemeModule, NbLayoutModule, NbStepperModule, NbButtonModule } from '@nebular/theme';
+import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -26,6 +30,8 @@ import { ValidationDesRisquesComponent } from './components/validation-des-risqu
     ValidationGridComponent,
     ProductValidationGridComponent,
     ValidationDesRisquesComponent,
+    StepperComponent,
+    QuestionnaireComponent,
     
     
   ],
@@ -38,7 +44,11 @@ import { ValidationDesRisquesComponent } from './components/validation-des-risqu
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    NbThemeModule.forRoot({ name: 'default' }),
+    NbLayoutModule,
+    NbStepperModule,
+    NbButtonModule,
     
   ],
   providers: [RiskService],

@@ -1,0 +1,59 @@
+.container {
+    .btn {
+      margin-bottom: 1rem;
+    }
+  
+    .list-group-item {
+      display: flex;
+      align-items: center;
+    }
+  }
+  
+  /* Custom styles for the question section */
+.card-body {
+    .form-control {
+      flex-grow: 1; /* Ensure the input takes up all available space */
+    }
+  
+    .btn-sm {
+      font-size: 1rem; /* Adjust the icon button size */
+    }
+  
+    .d-flex {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+  
+    .text-center {
+      text-align: center;
+    }
+  
+    .btn-danger {
+      background-color: #dc3545 !important; /* Ensures red color */
+      border-color: #dc3545 !important;
+    }
+
+    .btn-ajouter{
+        background-color: white;
+        color: black;
+        border: 1px solid black;
+    }
+
+    .btn-ajouter:hover{
+        background-color: black;
+        color: white;
+    }
+  
+    .btn-danger:hover {
+      background-color: #c82333 !important; /* Darker red on hover */
+      border-color: #c82333 !important;
+    }
+  
+    /* Adjust margin for the delete button */
+    .ms-2 {
+      margin-left: 0.5rem;
+      margin-top: 1rem;
+    }
+  }
+  

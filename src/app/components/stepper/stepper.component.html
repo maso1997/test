@@ -1,0 +1,25 @@
+<nb-stepper orientation="horizontal" #stepper>
+    <nb-step label="Step 1: Product Form" icon="edit-outline">
+        <gems-product-form
+        (productData)="onProductDataReceived($event)"
+        [stepper]="stepper"
+      ></gems-product-form>
+    </nb-step>
+  
+    <nb-step label="Step 2: Questionnaire" icon="question-mark-outline">
+        <gems-questionnaire
+        [productName]="productName"
+        [productDescription]="productDescription"
+        [stepper]="stepper"
+      ></gems-questionnaire>
+    </nb-step>
+  
+    <nb-step label="Step 3: Page 3" icon="archive-outline">
+      <!-- Content for Step 3 -->
+    </nb-step>
+  
+    <nb-step label="Step 4: Page 4" icon="checkmark-circle-2-outline">
+      <!-- Content for Step 4 -->
+    </nb-step>
+  </nb-stepper>
+  
