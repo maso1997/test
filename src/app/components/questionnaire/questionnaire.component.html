@@ -1,57 +1,87 @@
-<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
-
 <div class="container mt-4">
-    <div class="card shadow mx-4">
-      <div class="card-body px-5">
-        <h3 class="card-title mb-5 text-center">Questionnaire</h3>
-  
-        <!-- Product Details -->
-        <div class="mb-3">
-          <label class="form-label fw-bold">Nom du Produit:</label>
-          <p>{{ productName }}</p>
+  <div class="card shadow mx-4">
+    <div class="card-body px-5">
+      <h3 class="card-title mb-5 text-center">Questionnaire</h3>
+
+
+
+       <!-- Product Details -->
+       <div class="mb-3">
+        <label class="form-label fw-bold">Nom du Produit:</label>
+        <p>{{ productName }}</p>
+      </div>
+      <div class="mb-3">
+        <label class="form-label fw-bold">Description:</label>
+        <p>{{ productDescription }}</p>
+      </div>
+
+      <!-- Risk Type Dropdown -->
+      <div class="mb-4">
+        <label for="riskType" class="form-label fw-bold">Type de Risque:</label>
+        <select
+          id="riskType"
+          class="form-select"
+          [(ngModel)]="selectedRiskType"
+          (change)="onRiskTypeChange()"
+        >
+          <option *ngFor="let risk of riskTypes" [value]="risk.type">{{ risk.type }}</option>
+        </select>
+      </div>
+
+      <!-- Check Button Options -->
+      <div *ngIf="selectedRiskOptions.length > 0" class="mb-4">
+        <label class="form-label fw-bold">Options pour le Risque:</label>
+        <div class="form-check" *ngFor="let option of selectedRiskOptions">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            [id]="option"
+            [value]="option"
+            [(ngModel)]="selectedOptions[option]"
+          />
+          <label class="form-check-label" [for]="option">{{ option }}</label>
         </div>
-        <div class="mb-3">
-          <label class="form-label fw-bold">Description:</label>
-          <p>{{ productDescription }}</p>
+      </div>
+
+      <!-- Related Questions -->
+      <div *ngIf="selectedQuestions.length > 0" class="mb-4">
+        <label class="form-label fw-bold">Questions liées:</label>
+        <div *ngFor="let question of selectedQuestions" class="mb-2">
+          <label class="form-label">{{ question }}</label>
+          <input type="text" class="form-control" />
         </div>
-  
-        <!-- List of Questions -->
-        <div class="mb-3" *ngFor="let question of questions; let i = index; trackBy: trackByFn">
-          <label for="question{{ i }}" class="form-label">Question {{ i + 1 }}:</label>
-          <div class="d-flex align-items-center">
-            <input
-              id="question{{ i }}"
-              type="text"
-              class="form-control"
-              [(ngModel)]="questions[i]"
-              placeholder="Entrez votre question ici"
-            />
-            <button
-              type="button"
-              class="btn btn-sm btn-danger ms-2"
-              (click)="removeQuestion(i)"
-              aria-label="Supprimer la question"
-            >
-              <i class="bi bi-trash"></i> <!-- Trash icon -->
-            </button>
-          </div>
-  
-          <!-- Error message under the input -->
-          <div *ngIf="questionError" class="text-danger mt-2">
-            {{ questionError }}
-          </div>
+      </div>
+
+      <!-- List of Added Questions -->
+      <div *ngFor="let question of questions; let i = index; trackBy: trackByFn" class="mb-3">
+        <div class="d-flex align-items-center">
+          <input
+            id="question{{ i }}"
+            type="text"
+            class="form-control"
+            [(ngModel)]="questions[i]"
+            placeholder="Entrez votre question ici"
+          />
+          <button
+            type="button"
+            class="btn btn-sm btn-danger ms-2"
+            (click)="removeQuestion(i)"
+            aria-label="Supprimer la question"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
         </div>
-  
-        <!-- Button to Add a Question, Centered and Red -->
-        <div class="mb-3 text-center">
-          <button class=" btn btn-ajouter" (click)="addQuestion()">Ajouter une Question</button>
-        </div>
-  
-        <!-- Submit Button -->
-        <div class="mt-4 text-end">
-            <button class="btn btn-success btn-danger" (click)="submit(stepper)">Suivant</button>
-          </div>
+      </div>
+
+      <!-- Button to Add a Question -->
+      <div class="mb-3 text-center">
+        <button class="btn btn-ajouter" (click)="addQuestion()">Ajouter une Question</button>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="mt-4 text-end">
+        <button class="btn btn-success" (click)="submit(stepper)">Suivant</button>
       </div>
     </div>
   </div>
-  
+</div>
