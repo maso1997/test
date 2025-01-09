@@ -19,6 +19,7 @@ import { ValidationDesRisquesComponent } from './components/validation-des-risqu
 import { StepperComponent } from './components/stepper/stepper.component';
 import { NbThemeModule, NbLayoutModule, NbStepperModule, NbButtonModule } from '@nebular/theme';
 import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 
 @NgModule({
   declarations: [
@@ -32,6 +33,7 @@ import { QuestionnaireComponent } from './components/questionnaire/questionnaire
     ValidationDesRisquesComponent,
     StepperComponent,
     QuestionnaireComponent,
+    DashboardComponent,
     
     
   ],

@@ -1,0 +1,45 @@
+.container {
+    max-width: 1200px;
+    margin-top: 70px; /* Ajout d'une marge pour abaisser la carte */
+  }
+  
+  /* Carte principale */
+  .card.shadow-lg {
+    border: none;
+    padding: 20px;
+  }
+  
+  /* Cartes secondaires */
+  .card.shadow {
+    border: none;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  }
+  
+  .card.shadow:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .card-header {
+    font-weight: bold;
+    
+  }
+  
+  /* Titres des tableaux */
+  .card-header h4,
+  .card-header h5 {
+    font-size: 1.5rem;
+  }
+  
+  /* Tableaux */
+  .table-hover tbody tr:hover {
+    background-color: rgba(220, 53, 69, 0.1);
+    transition: background-color 0.3s ease;
+  }
+  
+  .table-bordered th,
+  .table-bordered td {
+    text-align: center;
+    vertical-align: middle;
+  }
+  

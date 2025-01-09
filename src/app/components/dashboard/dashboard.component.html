@@ -1,0 +1,104 @@
+<div class="container ">
+    <div class="card shadow-lg">
+        <h1 class="m-0 card-header text-center">DASHBOARD</h1>
+ 
+      <div class="card-body">
+        <!-- Ligne 1 : Notifications + Liste des produits -->
+        <div class="row g-4">
+          <!-- Notifications -->
+          <div class="col-lg-4 col-md-12">
+            <div class="card shadow h-100">
+              <div class="card-header bg-danger text-white text-center">
+                <h5 class="mb-0">Notifications</h5>
+              </div>
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let notification of notifications">
+                  <span class="text-muted">{{ notification.date }}</span>
+                  <span>{{ notification.title }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+  
+          <!-- Liste des produits -->
+          <div class="col-lg-8 col-md-12">
+            <div class="card shadow h-100">
+              <div class="card-header bg-danger text-white text-center">
+                <h5 class="mb-0">Liste des produits</h5>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover table-bordered mb-0">
+                  <thead class="bg-danger text-white">
+                    <tr>
+                      <th>Code Produit</th>
+                      <th>Nom Produit</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let produit of produits">
+                      <td>{{ produit.code }}</td>
+                      <td>{{ produit.nom }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Ligne 2 : Liste des risques + Questionnaire par risque -->
+        <div class="row g-4 mt-1">
+          <!-- Liste des risques -->
+          <div class="col-lg-6 col-md-12">
+            <div class="card shadow h-100">
+              <div class="card-header bg-danger text-white text-center">
+                <h5 class="mb-0">Liste des risques</h5>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover table-bordered mb-0">
+                  <thead class="bg-danger text-white">
+                    <tr>
+                      <th>Nom du risque</th>
+                      <th>Type</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let risque of risques">
+                      <td>{{ risque.nom }}</td>
+                      <td>{{ risque.type }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+  
+          <!-- Questionnaire par risque -->
+          <div class="col-lg-6 col-md-12">
+            <div class="card shadow h-100">
+              <div class="card-header bg-danger text-white text-center">
+                <h5 class="mb-0">Questionnaire par risque</h5>
+              </div>
+              <div class="card-body p-0">
+                <table class="table table-hover table-bordered mb-0">
+                  <thead class="bg-danger text-white">
+                    <tr>
+                      <th>Question</th>
+                      <th>Risque lié</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let questionnaire of questionnaires">
+                      <td>{{ questionnaire.question }}</td>
+                      <td>{{ questionnaire.risque }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
