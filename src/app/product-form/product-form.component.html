@@ -1,173 +1,212 @@
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-
 <div class="container mt-4">
   <div class="card shadow mx-4">
     <div class="card-body px-5">
       <h3 class="card-title mb-5 text-center">Créez votre Produit</h3>
       <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
-        <div class="row">
-          <!-- Code Produit -->
-          <div class="col-md-6 mb-3">
-            <label for="codeProduit" class="form-label fw-bold">Code Produit</label>
-            <input type="text" id="codeProduit" class="form-control" formControlName="codeProduit" readonly />
-          </div>
 
-          <!-- Nom du Produit -->
-          <div class="col-md-6 mb-3">
-            <label for="productName" class="form-label fw-bold">Nom du produit</label>
-            <input type="text" id="productName" class="form-control" formControlName="productName" placeholder="Entrez le nom du produit" />
-            <div *ngIf="productForm.get('productName')?.invalid && productForm.get('productName')?.touched" class="text-danger">
-              Nom du produit est requis.
+        <!-- Groupe Produit -->
+        <fieldset class="custom-fieldset mb-4 p-3 border rounded dark-red-border ">
+          
+          <div class="row">
+            <!-- Code Produit -->
+            <div class="col-md-6 mb-3">
+              <label for="codeProduit" class="form-label fw-bold">Code Produit</label>
+              <input type="text" id="codeProduit" class="form-control" formControlName="codeProduit" readonly />
+            </div>
+
+            <!-- Nom du Produit -->
+            <div class="col-md-6 mb-3">
+              <label for="productName" class="form-label fw-bold">Nom du produit</label>
+              <input type="text" id="productName" class="form-control" formControlName="productName" placeholder="Entrez le nom du produit" />
+              <div *ngIf="productForm.get('productName')?.invalid && productForm.get('productName')?.touched" class="text-danger">
+                Nom du produit est requis.
+              </div>
+            </div>
+
+            <!-- Description -->
+            <div class="col-md-12 mb-3">
+              <label for="description" class="form-label fw-bold">Description</label>
+              <textarea id="description" class="form-control" formControlName="description" placeholder="Entrez la description"></textarea>
+              <div *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched" class="text-danger">
+                Description est requise.
+              </div>
             </div>
           </div>
+        </fieldset>
 
-          <!-- Description -->
-          <div class="col-md-6 mb-3">
-            <label for="description" class="form-label fw-bold">Description</label>
-            <textarea id="description" class="form-control" formControlName="description" placeholder="Entrez la description"></textarea>
-            <div *ngIf="productForm.get('description')?.invalid && productForm.get('description')?.touched" class="text-danger">
-              Description est requise.
+        <!-- Groupe Porteurs -->
+        <fieldset class="custom-fieldset mb-4 p-3 border rounded">
+          <div class="row">
+            <!-- Porteur du Produit -->
+            <div class="col-md-6 mb-3">
+              <label for="porteurproduit" class="form-label fw-bold">Porteur du produit</label>
+              <select id="porteurproduit" class="form-select" formControlName="porteurproduit" (change)="onPorteurChange($event)">
+                <option value="" disabled selected>Porteur du produit</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+              </select>
+              <div *ngIf="productForm.get('porteurproduit')?.invalid && productForm.get('porteurproduit')?.touched" class="text-danger">
+                Porteur du produit est requis.
+              </div>
+            </div>
+
+            <!-- Adresse Mail du Porteur -->
+            <div class="col-md-6 mb-3">
+              <label for="porteurEmail" class="form-label fw-bold">Adresse Mail du Porteur</label>
+              <input type="email" id="porteurEmail" class="form-control" formControlName="porteurEmail" readonly />
+            </div>
+
+            <!-- Poste/Fonction -->
+            <div class="col-md-6 mb-3">
+              <label for="porteurPoste" class="form-label fw-bold">Poste/Fonction</label>
+              <input type="text" id="porteurPoste" class="form-control" formControlName="porteurPoste" />
+            </div>
+
+            <!-- Département -->
+            <div class="col-md-6 mb-3">
+              <label for="porteurDepartement" class="form-label fw-bold">Département</label>
+              <input type="text" id="porteurDepartement" class="form-control" formControlName="porteurDepartement" />
             </div>
           </div>
+        </fieldset>
 
-          <!-- Porteur du Produit -->
-          <div class="col-md-6 mb-3">
-            <label for="porteurproduit" class="form-label fw-bold">Porteur du produit</label>
-            <select id="porteurproduit" class="form-select" formControlName="porteurproduit" (change)="onPorteurChange($event)">
-              <option value="" disabled selected>Porteur du produit</option>
-              <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-            </select>
-            <div *ngIf="productForm.get('porteurproduit')?.invalid && productForm.get('porteurproduit')?.touched" class="text-danger">
-              Porteur du produit est requis.
+        <!-- Groupe Sponsor -->
+        <fieldset class="custom-fieldset mb-4 p-3 border rounded">
+          <div class="row">
+            <!-- Sponsor du Produit -->
+            <div class="col-md-6 mb-3">
+              <label for="sponsorproduit" class="form-label fw-bold">Sponsor du produit</label>
+              <select id="sponsorproduit" class="form-select" formControlName="sponsorproduit" (change)="onSponsorChange($event)">
+                <option value="" disabled selected>Sponsor du produit</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+              </select>
+              <div *ngIf="productForm.get('sponsorproduit')?.invalid && productForm.get('sponsorproduit')?.touched" class="text-danger">
+                Sponsor du produit est requis.
+              </div>
+            </div>
+
+            <!-- Adresse Mail du Sponsor -->
+            <div class="col-md-6 mb-3">
+              <label for="sponsorEmail" class="form-label fw-bold">Adresse Mail du Sponsor</label>
+              <input type="email" id="sponsorEmail" class="form-control" formControlName="sponsorEmail" readonly />
+            </div>
+
+            <!-- Poste/Fonction du Sponsor -->
+            <div class="col-md-6 mb-3">
+              <label for="sponsorPoste" class="form-label fw-bold">Poste/Fonction</label>
+              <input type="text" id="sponsorPoste" class="form-control" formControlName="sponsorPoste" />
+            </div>
+
+            <!-- Département du Sponsor -->
+            <div class="col-md-6 mb-3">
+              <label for="sponsorDepartement" class="form-label fw-bold">Département</label>
+              <input type="text" id="sponsorDepartement" class="form-control" formControlName="sponsorDepartement" />
             </div>
           </div>
+        </fieldset>
 
-          <!-- Adresse Mail du Porteur -->
-          <div class="col-md-6 mb-3">
-            <label for="porteurEmail" class="form-label fw-bold">Adresse Mail du Porteur</label>
-            <input type="email" id="porteurEmail" class="form-control" formControlName="porteurEmail" readonly />
-          </div>
-
-          <!-- Poste/Fonction -->
-          <div class="col-md-6 mb-3">
-            <label for="porteurPoste" class="form-label fw-bold">Poste/Fonction</label>
-            <input type="text" id="porteurPoste" class="form-control" formControlName="porteurPoste" />
-          </div>
-
-          <!-- Département -->
-          <div class="col-md-6 mb-3">
-            <label for="porteurDepartement" class="form-label fw-bold">Département</label>
-            <input type="text" id="porteurDepartement" class="form-control" formControlName="porteurDepartement" />
-          </div>
-
-          <div class="col-md-6 mb-3">
-            <label for="sponsorproduit" class="form-label fw-bold">Sponsor du produit</label>
-            <select id="sponsorproduit" class="form-select" formControlName="sponsorproduit" (change)="onSponsorChange($event)">
-              <option value="" disabled selected>Sponsor du produit</option>
-              <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-            </select>
-            <div *ngIf="productForm.get('sponsorproduit')?.invalid && productForm.get('sponsorproduit')?.touched" class="text-danger">
-              Sponsor du produit est requis.
+        <!-- Autres Champs -->
+        <fieldset class="custom-fieldset mb-4 p-3 border rounded">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="coprésidentmétier" class="form-label fw-bold">Co-président métier</label>
+              <select id="coprésidentmétier" class="form-select" formControlName="coprésidentmétier">
+                <option value="" disabled selected>Co-président métier</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+              </select>
+              <div *ngIf="productForm.get('coprésidentmétier')?.invalid && productForm.get('coprésidentmétier')?.touched" class="text-danger">
+                Co-président métier est requis.
+              </div>
             </div>
-          </div>
-
-          <!-- Adresse Mail du Sponsor -->
-          <div class="col-md-6 mb-3">
-            <label for="sponsorEmail" class="form-label fw-bold">Adresse Mail du Sponsor</label>
-            <input type="email" id="sponsorEmail" class="form-control" formControlName="sponsorEmail" readonly />
-          </div>
-
-          <!-- Poste/Fonction du Sponsor -->
-          <div class="col-md-6 mb-3">
-            <label for="sponsorPoste" class="form-label fw-bold">Poste/Fonction</label>
-            <input type="text" id="sponsorPoste" class="form-control" formControlName="sponsorPoste" />
-          </div>
-
-          <!-- Département du Sponsor -->
-          <div class="col-md-6 mb-3">
-            <label for="sponsorDepartement" class="form-label fw-bold">Département</label>
-            <input type="text" id="sponsorDepartement" class="form-control" formControlName="sponsorDepartement" />
-          </div>
-
-          <!-- Co-président métier -->
-          <div class="col-md-6 mb-3">
-            <label for="coprésidentmétier" class="form-label fw-bold">Co-président métier</label>
-            <select id="coprésidentmétier" class="form-select" formControlName="coprésidentmétier">
-              <option value="" disabled selected>Co-président métier</option>
-              <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-            </select>
-            <div *ngIf="productForm.get('coprésidentmétier')?.invalid && productForm.get('coprésidentmétier')?.touched" class="text-danger">
-              Co-président métier est requis.
-            </div>
-          </div>
-
-          <!-- Co-président risque -->
-          <div class="col-md-6 mb-3">
-            <label for="coprésidentrisque" class="form-label fw-bold">Co-président risque</label>
-            <select id="coprésidentrisque" class="form-select" formControlName="coprésidentrisque">
-              <option value="" disabled selected>Co-président risque</option>
-              <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-            </select>
-            <div *ngIf="productForm.get('coprésidentrisque')?.invalid && productForm.get('coprésidentrisque')?.touched" class="text-danger">
-              Co-président risque est requis.
-            </div>
-          </div>
-
-          <!-- Affectation -->
-          <div class="col-md-6 mb-3">
-            <label for="affectation" class="form-label fw-bold">Affectation</label>
-            <select id="affectation" class="form-select" formControlName="affectation">
-              <option value="" disabled selected>Affectation</option>
-              <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
-            </select>
-            <div *ngIf="productForm.get('affectation')?.invalid && productForm.get('affectation')?.touched" class="text-danger">
-              Affectation est requise.
-            </div>
-          </div>
-
-          <!-- Créé par -->
-          <div class="col-md-6 mb-3">
-            <label for="createdBy" class="form-label fw-bold">Créé par</label>
-            <input type="text" id="createdBy" class="form-control" formControlName="createdBy" readonly />
-          </div>
-
-          <!-- Statut -->
-          <div class="col-md-6 mb-3">
-            <label for="status" class="form-label fw-bold">Statut</label>
-            <input type="text" id="status" class="form-control" formControlName="status" readonly />
-          </div>
-
-          <!-- Documents -->
-          <div class="col-md-6 mb-3">
-            <label for="documents" class="form-label fw-bold">Documents</label>
-            <input type="file" id="documents" multiple (change)="onFileSelect($event)" class="form-control" />
-            <ul class="mt-2">
-              <li *ngFor="let file of selectedFiles; let i = index" class="d-flex align-items-center">
-                <span class="me-2">{{ file.name }}</span>
-                <button type="button" class="btn btn-danger btn-sm" (click)="removeFile(i)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </li>
-            </ul>
-          </div>
-          <div *ngIf="!productForm.valid">Form is invalid</div>
-
-
-          <!-- Sponsor du produit -->
-          <div class="mt-4 text-end">
-            
-           
-            <button 
-  type="submit" 
-  class="btn btn-success btn-danger mb-3"
-  nbButton 
-  status="success" 
-  [disabled]="productForm.invalid || selectedFiles.length === 0">
-  Suivant
-</button>
-          </div>
-        </div>
         
+            <div class="col-md-6 mb-3">
+              <label for="coprésidentrisque" class="form-label fw-bold">Co-président risque</label>
+              <select id="coprésidentrisque" class="form-select" formControlName="coprésidentrisque">
+                <option value="" disabled selected>Co-président risque</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+              </select>
+              <div *ngIf="productForm.get('coprésidentrisque')?.invalid && productForm.get('coprésidentrisque')?.touched" class="text-danger">
+                Co-président risque est requis.
+              </div>
+            </div>
+        
+            <div class="col-md-6 mb-3">
+              <label for="affectation" class="form-label fw-bold">Affectation</label>
+              <select id="affectation" class="form-select" formControlName="affectation">
+                <option value="" disabled selected>Affectation</option>
+                <option *ngFor="let user of users" [value]="user.id">{{ user.name }}</option>
+              </select>
+              <div *ngIf="productForm.get('affectation')?.invalid && productForm.get('affectation')?.touched" class="text-danger">
+                Affectation est requise.
+              </div>
+            </div>
+        
+            <div class="col-md-6 mb-3">
+              <label for="createdBy" class="form-label fw-bold">Créé par</label>
+              <input type="text" id="createdBy" class="form-control" formControlName="createdBy" readonly />
+            </div>
+        
+            <div class="col-md-6 mb-3">
+              <label for="status" class="form-label fw-bold">Statut</label>
+              <input type="text" id="status" class="form-control" formControlName="status" readonly />
+            </div>
+        
+            <!-- Règlementaire -->
+            <div class="col-md-6 mb-3">
+              <label class="form-label fw-bold">Règlementaire</label>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="reglementaire"
+                  id="reglementaireOui"
+                  value="oui"
+                  formControlName="reglementaire"
+                />
+                <label class="form-check-label" for="reglementaireOui">Oui</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="radio"
+                  name="reglementaire"
+                  id="reglementaireNon"
+                  value="non"
+                  formControlName="reglementaire"
+                />
+                <label class="form-check-label" for="reglementaireNon">Non</label>
+              </div>
+            </div>
+        
+            <!-- Documents -->
+            <div class="col-md-12 mb-3">
+              <label for="documents" class="form-label fw-bold">Documents</label>
+              <input type="file" id="documents" multiple (change)="onFileSelect($event)" class="form-control" />
+              <ul class="mt-2">
+                <li *ngFor="let file of selectedFiles; let i = index" class="d-flex align-items-center">
+                  <span class="me-2">{{ file.name }}</span>
+                  <button type="button" class="btn btn-danger btn-sm" (click)="removeFile(i)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </li>
+              </ul>
+            </div>
+        
+            <div *ngIf="!productForm.valid" class="text-danger">Form is invalid</div>
+          </div>
+        </fieldset>
+        
+
+        <!-- Bouton -->
+        <div class="text-end">
+          <button 
+            type="submit" 
+            class="btn btn-success btn-danger mb-3"
+            nbButton 
+            status="success" 
+            [disabled]="productForm.invalid || selectedFiles.length === 0">
+            Suivant
+          </button>
+        </div>
       </form>
     </div>
   </div>

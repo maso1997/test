@@ -21,4 +21,28 @@ input:focus, textarea:focus, select:focus {
   button {
     margin-top: 20px;
   }
+
+  /* Style du fieldset */
+fieldset {
+  border: 2px solid darkred; /* Bordure rouge foncé */
+  box-shadow: 0 4px 8px rgba(0.8, 0.8, 0.8, 0.8); /* Ombre légère */
+  padding: 15px; /* Espacement interne */
+}
+
+.dark-red-border {
+  border: 2px solid #8B0000; /* Rouge foncé */
+  box-shadow: 0 4px 8px rgba(139, 0, 0, 0.5); /* Ombre rouge foncé */
+  border-radius: 8px; /* Arrondir les coins */
+}
+/* Style du titre */
+.card-title {
+  color: darkred; /* Texte rouge foncé */
+  font-size: 2rem; /* Agrandir le texte */
+  font-weight: bold; /* Gras pour le titre */
+}
+
+.custom-fieldset {
+  border: 2px solid darkred;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
   
