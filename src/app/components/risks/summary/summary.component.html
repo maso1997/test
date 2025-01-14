@@ -1,0 +1,9 @@
+<div>
+    <h3>Résumé</h3>
+    <ul class="list-group">
+      <li *ngFor="let item of summary" class="list-group-item">
+        {{ item.type }} : {{ item.yesCount }}/{{ item.total }} - {{ item.message }}
+      </li>
+    </ul>
+  </div>
+  

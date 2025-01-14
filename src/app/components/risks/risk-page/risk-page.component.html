@@ -1,0 +1,19 @@
+<div>
+    <h3>{{ risk.type }}</h3>
+    <ul class="list-group">
+      <li
+        *ngFor="let question of risk.questions; let i = index"
+        class="list-group-item d-flex justify-content-between align-items-center"
+      >
+        {{ question }}
+        <button
+          class="btn"
+          [ngClass]="{ 'btn-success': answers[i], 'btn-outline-secondary': !answers[i] }"
+          (click)="toggleAnswer(i)"
+        >
+          {{ answers[i] ? 'Oui' : 'Non' }}
+        </button>
+      </li>
+    </ul>
+  </div>
+  

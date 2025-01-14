@@ -1,0 +1,30 @@
+<div class="container mt-5">
+    <ng-container *ngIf="currentPage < risksService.risks.length; else summary">
+      <app-risk-page
+        [risk]="risksService.risks[currentPage]"
+        [answers]="risksService.answers[currentPage]"
+      ></app-risk-page>
+    </ng-container>
+  
+    <ng-template #summary>
+      <app-summary></app-summary>
+    </ng-template>
+  
+    <div class="d-flex justify-content-between mt-4">
+      <button
+        class="btn btn-secondary"
+        (click)="prevPage()"
+        [disabled]="currentPage === 0"
+      >
+        Précédent
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="nextPage()"
+        [disabled]="currentPage === risksService.risks.length"
+      >
+        Suivant
+      </button>
+    </div>
+  </div>
+  

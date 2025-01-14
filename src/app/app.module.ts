@@ -4,7 +4,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { ProductFormComponent } from './product-form/product-form.component';
-import { RiskListComponent } from './components/risks/risk-list/risk-list.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -20,12 +19,14 @@ import { StepperComponent } from './components/stepper/stepper.component';
 import { NbThemeModule, NbLayoutModule, NbStepperModule, NbButtonModule } from '@nebular/theme';
 import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
+import { RisksComponent } from './components/risks/risks.component';
+import { RiskPageComponent } from './components/risks/risk-page/risk-page.component';
+import { SummaryComponent } from './components/risks/summary/summary.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     ProductFormComponent,
-    RiskListComponent,
     ReportComponent,
     TableFilterComponent,
     ValidationGridComponent,
@@ -34,6 +35,9 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     StepperComponent,
     QuestionnaireComponent,
     DashboardComponent,
+    RisksComponent,
+    RiskPageComponent,
+    SummaryComponent,
     
     
   ],
