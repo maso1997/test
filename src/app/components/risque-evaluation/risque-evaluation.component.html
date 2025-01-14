@@ -1,0 +1,53 @@
+<div class="card" *ngIf="currentPage < risks.length">
+    <div class="card-body">
+      <h5 class="card-title text-center">{{ currentRisk.title }}</h5>
+      <app-questions
+        [questions]="currentRisk.questions"
+        [answers]="answers[currentPage]"
+        (answersChange)="answers[currentPage] = $event"
+      ></app-questions>
+  
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <button
+          class="btn btn-secondary"
+          (click)="prevPage()"
+          [disabled]="currentPage === 0"
+        >
+          Précédent
+        </button>
+  
+        <button
+  *ngIf="currentPage < risks.length - 1"
+  class="btn btn-secondary"
+  (click)="nextPage()"
+  [disabled]="!isPageValid()"  
+>
+  Suivant
+</button>
+  
+        <button
+          *ngIf="currentPage === risks.length - 1"
+          class="btn btn-primary"
+          (click)="calculateResults()"
+          [disabled]="!isPageValid()"  
+        >
+          Résultats
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="card" *ngIf="currentPage === risks.length">
+    <div class="card-body">
+      <h5 class="card-title">Résumé</h5>
+      <div *ngFor="let risk of risks; let i = index">
+        <label class="form-label">{{ risk.title }}</label>
+        <p>{{ results[i] }}</p>
+      </div>
+      <p class="form-label text-center recommendation">{{ recommendation }}</p>
+      <button class="btn btn-secondary mt-3" (click)="currentPage = 0">
+        Recommencer
+      </button>
+    </div>
+  </div>
+  

@@ -46,3 +46,17 @@ fieldset {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
   
+
+.tooltip {
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 0.9rem;
+  border-radius: 5px;
+  padding: 10px;
+  text-align: left;
+
+  .tooltip-inner {
+    max-width: 00px;
+    text-align: left;
+  }
+}

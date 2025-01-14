@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { NbStepperComponent } from '@nebular/theme';
+import { Tooltip } from 'bootstrap';
 
 @Component({
   selector: 'gems-product-form',
@@ -20,6 +21,33 @@ export class ProductFormComponent {
   selectedFiles: File[] = [];
   isReasonRequired: boolean = false;
 
+
+  get tooltipContent(): string {
+    const userId = this.productForm.get('porteurproduit')?.value; // Get the selected porteur ID
+    const user = this.users.find(u => u.id === +userId); // Find user by ID in the array
+    
+      return `
+        <div>
+          <p><strong>Name:</strong> Ameni </p>
+          <p><strong>Email:</strong> amenidjemai@gmail.com</p>
+          <p><strong>Role:</strong> ingénieur</p>
+          <p><strong>Department:</strong> dev</p>
+        </div>
+      `;
+    
+  }
+  
+
+  ngAfterViewInit(): void {
+    const createdByElement = document.getElementById('createdBy');
+    if (createdByElement) {
+      new Tooltip(createdByElement, {
+        title: this.tooltipContent,
+        html: true, 
+      });
+    }
+  }
+  selectedUser: any = null;
   constructor(private fb: FormBuilder) {
     this.productForm = this.fb.group({
       codeProduit: [{ value: 'Generated Code', disabled: true }], // No validators

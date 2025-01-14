@@ -142,7 +142,8 @@
         
             <div class="col-md-6 mb-3">
               <label for="createdBy" class="form-label fw-bold">Créé par</label>
-              <input type="text" id="createdBy" class="form-control" formControlName="createdBy" readonly />
+              <input type="text" id="createdBy" class="form-control" formControlName="createdBy" 
+                data-bs-toggle="tooltip" [attr.data-bs-title]="tooltipContent" />
             </div>
         
             <div class="col-md-6 mb-3">

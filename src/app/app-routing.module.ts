@@ -7,7 +7,7 @@ import { ProductValidationGridComponent } from './components/product-validation-
 import { ValidationDesRisquesComponent } from './components/validation-des-risques/validation-des-risques.component';
 import { StepperComponent } from './components/stepper/stepper.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { RisksComponent } from './components/risks/risks.component';
+import { RisqueEvaluationComponent } from './components/risque-evaluation/risque-evaluation.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'product-form', pathMatch: 'full' },
@@ -17,8 +17,9 @@ const routes: Routes = [
   { path: 'product-grid', component: ProductValidationGridComponent },
   { path: 'validation-risques', component: ValidationDesRisquesComponent },
   { path: 'stepper', component: StepperComponent },
-  { path: 'risks', component: RisksComponent },
   { path: 'dashboard', component: DashboardComponent },
+  { path: 'risques', component:  RisqueEvaluationComponent},
+
 
   // Add the route
 ];

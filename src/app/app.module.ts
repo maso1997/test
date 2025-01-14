@@ -19,9 +19,8 @@ import { StepperComponent } from './components/stepper/stepper.component';
 import { NbThemeModule, NbLayoutModule, NbStepperModule, NbButtonModule } from '@nebular/theme';
 import { QuestionnaireComponent } from './components/questionnaire/questionnaire.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
-import { RisksComponent } from './components/risks/risks.component';
-import { RiskPageComponent } from './components/risks/risk-page/risk-page.component';
-import { SummaryComponent } from './components/risks/summary/summary.component';
+import { RisqueEvaluationComponent } from './components/risque-evaluation/risque-evaluation.component';
+import { QuestionsComponent } from './components/questions/questions.component';
 
 @NgModule({
   declarations: [
@@ -35,9 +34,9 @@ import { SummaryComponent } from './components/risks/summary/summary.component';
     StepperComponent,
     QuestionnaireComponent,
     DashboardComponent,
-    RisksComponent,
-    RiskPageComponent,
-    SummaryComponent,
+    RisqueEvaluationComponent,
+    QuestionsComponent,
+
     
     
   ],

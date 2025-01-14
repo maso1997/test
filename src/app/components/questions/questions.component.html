@@ -1,0 +1,29 @@
+<div class="card">
+    <div class="card-body">
+      <h5 class="card-title fw-bold">Questions par risque</h5>
+      <div *ngFor="let question of questions; let i = index" class="question-container mb-4">
+        <label class="form-label">{{ question.questionText }}</label>
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="radio"
+            [name]="'question' + i"
+            [checked]="answers[i] === true"
+            (change)="handleRadioChange(i, true)"
+          />
+          <label class="form-check-label ms-2">Oui</label>
+        </div>
+        <div class="form-check form-check-inline">
+          <input
+            class="form-check-input"
+            type="radio"
+            [name]="'question' + i"
+            [checked]="answers[i] === false"
+            (change)="handleRadioChange(i, false)"
+          />
+          <label class="form-check-label ms-2">Non</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,27 @@
+.card {
+    margin: 20px;
+  
+    .question-container {
+      margin-bottom: 20px;
+  
+      .form-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+  
+      .form-check-inline {
+        display: inline-block;
+        margin-right: 20px;
+      }
+  
+      .form-check-label {
+        margin-left: 5px;
+      }
+    }
+  
+    button {
+      margin-top: 20px;
+    }
+  }
+  
