@@ -13,56 +13,59 @@ export class RisqueEvaluationComponent {
     const currentAnswers = this.answers[this.currentPage];
     return currentAnswers.every(answer => answer !== null);  // Check if all answers are not null
   }
+
+
+  isLoading: boolean = false;
   
   risks = [
     {
       title: 'Risque Financier',
       questions: [
         { questionText: 'La trésorerie est-elle suffisante pour ce projet ?' },
-        { questionText: 'Les coûts sont-ils bien estimés ?' },
-        { questionText: 'Le retour sur investissement est-il incertain ?' },
-        { questionText: 'Y a-t-il des dettes importantes liées à ce projet ?' },
-        { questionText: 'Les prévisions financières sont-elles réalistes ?' }
+       // { questionText: 'Les coûts sont-ils bien estimés ?' },
+        //{ questionText: 'Le retour sur investissement est-il incertain ?' },
+       // { questionText: 'Y a-t-il des dettes importantes liées à ce projet ?' },
+        //{ questionText: 'Les prévisions financières sont-elles réalistes ?' }
       ]
     },
     {
       title: 'Risque Juridique',
       questions: [
         { questionText: 'Le projet respecte-t-il les lois en vigueur ?' },
-        { questionText: 'Y a-t-il des risques de litiges ?' },
-        { questionText: 'Les contrats sont-ils clairs et complets ?' },
-        { questionText: 'Les données sont-elles protégées conformément au RGPD ?' },
-        { questionText: 'Y a-t-il un risque de non-conformité ?' }
+        //{ questionText: 'Y a-t-il des risques de litiges ?' },
+        //{ questionText: 'Les contrats sont-ils clairs et complets ?' },
+       // { questionText: 'Les données sont-elles protégées conformément au RGPD ?' },
+       // { questionText: 'Y a-t-il un risque de non-conformité ?' }
       ]
     },
     {
       title: 'Risque Opérationnel',
       questions: [
         { questionText: 'Les processus sont-ils bien définis ?' },
-        { questionText: 'Les employés sont-ils formés pour ce projet ?' },
-        { questionText: 'Les outils nécessaires sont-ils disponibles ?' },
-        { questionText: 'Y a-t-il un risque d\'erreurs humaines ?' },
-        { questionText: 'Les délais sont-ils réalistes ?' }
+       // { questionText: 'Les employés sont-ils formés pour ce projet ?' },
+       // { questionText: 'Les outils nécessaires sont-ils disponibles ?' },
+       // { questionText: 'Y a-t-il un risque d\'erreurs humaines ?' },
+       // { questionText: 'Les délais sont-ils réalistes ?' }
       ]
     },
     {
       title: 'Risque Technologique',
       questions: [
         { questionText: 'La technologie est-elle mature ?' },
-        { questionText: 'Les systèmes sont-ils bien sécurisés ?' },
-        { questionText: 'Y a-t-il un plan de sauvegarde ?' },
-        { questionText: 'Les outils technologiques sont-ils compatibles ?' },
-        { questionText: 'Le projet dépend-il de fournisseurs tiers ?' }
+       // { questionText: 'Les systèmes sont-ils bien sécurisés ?' },
+       // { questionText: 'Y a-t-il un plan de sauvegarde ?' },
+      //  { questionText: 'Les outils technologiques sont-ils compatibles ?' },
+       // { questionText: 'Le projet dépend-il de fournisseurs tiers ?' }
       ]
     },
     {
       title: 'Risque Stratégique',
       questions: [
         { questionText: 'Le projet est-il aligné avec la stratégie globale ?' },
-        { questionText: 'Les objectifs sont-ils clairs ?' },
-        { questionText: 'Y a-t-il des impacts négatifs sur l\'image de l\'entreprise ?' },
-        { questionText: 'Le marché cible est-il bien défini ?' },
-        { questionText: 'Les concurrents sont-ils bien analysés ?' }
+        //{ questionText: 'Les objectifs sont-ils clairs ?' },
+       // { questionText: 'Y a-t-il des impacts négatifs sur l\'image de l\'entreprise ?' },
+       // { questionText: 'Le marché cible est-il bien défini ?' },
+        //{ questionText: 'Les concurrents sont-ils bien analysés ?' }
       ]
     }
   ];
@@ -119,7 +122,7 @@ export class RisqueEvaluationComponent {
     // Automatically move to the next step after 1 second
     setTimeout(() => {
       this.stepper.next(); // Move to the next step
-    }, 1000);
+    }, 5000);
   }
 
   
