@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component,  Input } from '@angular/core';
+import { NbStepperComponent } from '@nebular/theme';
 
 @Component({
-  selector: 'app-risque-evaluation',
+  selector: 'gems-risque-evaluation',
   templateUrl: './risque-evaluation.component.html',
   styleUrls: ['./risque-evaluation.component.scss']
 })
 export class RisqueEvaluationComponent {
+  @Input() stepper!: NbStepperComponent; 
 
   isPageValid(): boolean {
     const currentAnswers = this.answers[this.currentPage];
@@ -97,22 +99,28 @@ export class RisqueEvaluationComponent {
       return `${risk.title}: ${yesCount}/${risk.questions.length} réponses "oui"`;
     });
   
-    // Trouver les risques avec plus de la moitié des réponses "oui"
+    // Identify risky categories
     const riskyRisks = this.risks.filter((risk, i) => {
       const yesCount = this.answers[i].filter(answer => answer === true).length;
-      const majority = risk.questions.length / 2; // Plus de la moitié des questions
+      const majority = risk.questions.length / 2; // More than half of the questions
       return yesCount > majority;
     }).map(risk => risk.title);
   
-    // Modifier la recommandation en fonction des risques trouvés
+    // Update the recommendation based on risky categories
     if (riskyRisks.length > 0) {
       this.recommendation = `Vous avez des risques : ${riskyRisks.join(', ')}. Votre demande sera traitée.`;
     } else {
       this.recommendation = 'Votre demande sera traitée.';
     }
   
-    // Passe à la vue des résultats
+    // Move to the results page
     this.currentPage = this.risks.length;
+  
+    // Automatically move to the next step after 1 second
+    setTimeout(() => {
+      this.stepper.next(); // Move to the next step
+    }, 1000);
   }
+
   
 }
