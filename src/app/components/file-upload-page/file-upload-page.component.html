@@ -1,0 +1,84 @@
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Upload Your Files</h2>
+
+
+    
+    <div class="file-upload-container mx-auto">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Code de Produit</label>
+                <p>{{ codeProduit }}</p>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Nom du Produit:</label>
+                <p>{{ productName }}</p>
+              </div>
+    
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Description:</label>
+                <p>{{ productDescription }}</p>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Crée par</label>
+                <p>{{ createdBy }}</p>
+              </div>
+    
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label fw-bold">Reglementaire</label>
+                <p>{{ reglementaire }}</p>
+            </div>
+           
+    
+        </div>
+      <!-- Zone d'upload -->
+      <div
+        class="file-upload-box border border-dashed p-4 text-center"
+        (click)="fileInput.click()"
+      >
+        <input
+          type="file"
+          #fileInput
+          (change)="onFilesSelected($event)"
+          class="d-none"
+          multiple
+        />
+        <div>
+          <!-- Logo -->
+          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50" height="50" viewBox="0,0,256,256">
+            <g fill="#ff0000" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.33333,5.33333)"><path d="M23.97852,6c-0.39034,0.00571 -0.76308,0.16335 -1.03906,0.43945l-6,6c-0.39185,0.37623 -0.54969,0.9349 -0.41265,1.46055c0.13704,0.52565 0.54754,0.93616 1.07319,1.07319c0.52565,0.13704 1.08432,-0.0208 1.46055,-0.41265l3.43945,-3.43945v21.37891c-0.00765,0.54095 0.27656,1.04412 0.74381,1.31683c0.46725,0.27271 1.04514,0.27271 1.51238,0c0.46725,-0.27271 0.75146,-0.77588 0.74381,-1.31683v-21.37891l3.43945,3.43945c0.37623,0.39185 0.9349,0.54969 1.46055,0.41265c0.52565,-0.13704 0.93616,-0.54754 1.07319,-1.07319c0.13704,-0.52565 -0.0208,-1.08432 -0.41265,-1.46055l-6,-6c-0.28651,-0.28663 -0.6768,-0.44514 -1.08203,-0.43945zM11.5,17c-3.01977,0 -5.5,2.48023 -5.5,5.5v14c0,3.01977 2.48023,5.5 5.5,5.5h25c3.01977,0 5.5,-2.48023 5.5,-5.5v-14c0,-3.01977 -2.48023,-5.5 -5.5,-5.5h-2c-0.54095,-0.00765 -1.04412,0.27656 -1.31683,0.74381c-0.27271,0.46725 -0.27271,1.04514 0,1.51238c0.27271,0.46725 0.77588,0.75146 1.31683,0.74381h2c1.39823,0 2.5,1.10177 2.5,2.5v14c0,1.39823 -1.10177,2.5 -2.5,2.5h-25c-1.39823,0 -2.5,-1.10177 -2.5,-2.5v-14c0,-1.39823 1.10177,-2.5 2.5,-2.5h2c0.54095,0.00765 1.04412,-0.27656 1.31683,-0.74381c0.27271,-0.46725 0.27271,-1.04514 0,-1.51238c-0.27271,-0.46725 -0.77588,-0.75146 -1.31683,-0.74381z"></path></g></g>
+            </svg>
+        </div>
+      </div>
+  
+      <!-- Message indiquant le nombre de fichiers sélectionnés -->
+      <div class="mt-3 text-center" *ngIf="selectedFiles.length > 0">
+        <p class="text-success">
+          {{ selectedFiles.length }} fichier{{ selectedFiles.length > 1 ? 's' : '' }} sélectionné{{ selectedFiles.length > 1 ? 's' : '' }}.
+        </p>
+      </div>
+  
+      <!-- Liste des fichiers sélectionnés avec défilement -->
+      <div class="uploaded-files-list">
+        <div
+          *ngFor="let file of selectedFiles; let i = index"
+          class="uploaded-file p-2 d-flex align-items-center justify-content-between border rounded"
+        >
+          <span>{{ file.name }}</span>
+          <button
+            type="button"
+            class="btn btn-danger btn-sm"
+            (click)="removeFile(i)"
+          >
+            <i class="bi bi-trash"></i>
+          </button>
+        </div>
+      </div>
+      <div class="text-end">
+        <button class="btn btn-upload" (click)="submit(stepper)">Suivant</button>
+      </div>
+    </div>
+  </div>

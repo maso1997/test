@@ -8,6 +8,7 @@ import { ValidationDesRisquesComponent } from './components/validation-des-risqu
 import { StepperComponent } from './components/stepper/stepper.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { RisqueEvaluationComponent } from './components/risque-evaluation/risque-evaluation.component';
+import { FileUploadPageComponent } from './components/file-upload-page/file-upload-page.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'product-form', pathMatch: 'full' },
@@ -19,6 +20,7 @@ const routes: Routes = [
   { path: 'stepper', component: StepperComponent },
   { path: 'dashboard', component: DashboardComponent },
   { path: 'risques', component:  RisqueEvaluationComponent},
+  { path: 'fileupload', component: FileUploadPageComponent },
 
 
   // Add the route

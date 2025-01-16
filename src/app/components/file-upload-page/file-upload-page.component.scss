@@ -1,0 +1,117 @@
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-upload{
+    background-color: #c62828;
+    color: white;
+  }
+  
+  h2 {
+    text-align: center;
+    font-weight: 700;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #e63946; /* Danger red */
+  }
+  
+  .file-upload-container {
+    max-width: 500px;
+    margin: auto;
+  }
+  
+  .file-upload-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background-color: #ffffff; /* White */
+    border: 2px dashed #e63946; /* Danger red */
+    border-radius: 16px;
+    padding: 40px;
+    transition: background-color 0.3s, border-color 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  
+  .file-upload-box:hover {
+    background-color: #c62828; /* Darker red */
+    border-color: #b71c1c; /* Very dark red */
+    color: #ffffff;
+    transform: scale(1.05);
+  }
+  
+  .file-upload-box svg {
+    fill: #e63946; /* Danger red */
+    transition: fill 0.3s;
+  }
+  
+  .file-upload-box:hover svg {
+    fill: #ffffff; /* White */
+  }
+  
+  .text-success {
+    font-size: 16px;
+    font-weight: 600;
+    color: #060606; /* Very dark gray */
+  }
+  
+  .uploaded-files-list {
+    max-height: 200px; /* Fixed height for scrollable area */
+    overflow-y: auto; /* Vertical scrollbar */
+    margin-top: 20px;
+  }
+  
+  .uploaded-file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #ffffff; /* White */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Light border */
+    border-radius: 12px;
+    padding: 10px 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  
+  .uploaded-file:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .uploaded-file span {
+    font-size: 16px;
+    color: #212529; /* Dark gray */
+    font-weight: 500;
+    flex: 1;
+    margin-right: 10px;
+    word-break: break-word; /* Prevent overflow */
+  }
+  
+  .uploaded-file button {
+    background-color: #e63946; /* Danger red */
+    color: #ffffff; /* White */
+    border: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+  
+  .uploaded-file button:hover {
+    background-color: #b71c1c; /* Darker red */
+    transform: scale(1.1);
+  }
+  
+  .uploaded-file button i {
+    font-size: 16px;
+  }
+  

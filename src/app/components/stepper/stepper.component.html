@@ -1,27 +1,29 @@
 <nb-stepper orientation="horizontal" #stepper>
-    <nb-step label="Step 1: Product Form" icon="edit-outline">
-        <gems-product-form
-        (productData)="onProductDataReceived($event)"
-        [stepper]="stepper"
-      ></gems-product-form>
-    </nb-step>
-  
-    <nb-step label="Step 2: Questionnaire" icon="question-mark-outline">
-        <gems-questionnaire
-        [productName]="productName"
-        [productDescription]="productDescription"
-        [stepper]="stepper"
-      ></gems-questionnaire>
-    </nb-step>
-  
-    <nb-step label="Step 3: Risk Evaluation" icon="archive-outline">
-      <gems-risque-evaluation
-      [stepper]="stepper">
-      </gems-risque-evaluation>
-    </nb-step>
-  
-    <nb-step label="Step 4: Page 4" icon="checkmark-circle-2-outline">
-      <!-- Content for Step 4 -->
-    </nb-step>
-  </nb-stepper>
-  
+  <nb-step label="Step 1: Product Form" icon="edit-outline">
+      <gems-product-form
+      (productData)="onProductDataReceived($event)"
+      [stepper]="stepper"
+    ></gems-product-form>
+  </nb-step>
+
+  <nb-step label="Step 2: DNP" icon="question-mark-outline">
+      <gem-file-upload-page
+      [codeProduit]="codeProduit"
+      [productName]="productName"
+      [productDescription]="productDescription"
+      [createdBy]="createdBy"
+      [reglementaire]="reglementaire"
+      [stepper]="stepper"
+    ></gem-file-upload-page>
+  </nb-step>
+
+  <nb-step label="Step 3: Risk Evaluation" icon="archive-outline">
+    <gems-risque-evaluation
+    [stepper]="stepper">
+    </gems-risque-evaluation>
+  </nb-step>
+
+  <nb-step label="Step 4: Page 4" icon="checkmark-circle-2-outline">
+    <!-- Content for Step 4 -->
+  </nb-step>
+</nb-stepper>

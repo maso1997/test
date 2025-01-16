@@ -10,7 +10,7 @@ import { Tooltip } from 'bootstrap';
 })
 export class ProductFormComponent {
   @Input() stepper!: NbStepperComponent; 
-  @Output() productData = new EventEmitter<{ productName: string, description: string }>(); // Emit product data// Input to control the stepper navigation
+  @Output() productData = new EventEmitter<{ codeProduit:string,productName: string, description: string,createdBy:string,reglementaire:boolean }>(); // Emit product data// Input to control the stepper navigation
 
   productForm: FormGroup;
   users = [
@@ -125,8 +125,12 @@ export class ProductFormComponent {
     if (this.productForm.valid && this.selectedFiles.length > 0) {
       // Emit product name and description to parent
       this.productData.emit({
+        codeProduit:this.productForm.get('codeProduit')?.value,
         productName: this.productForm.get('productName')?.value,
         description: this.productForm.get('description')?.value,
+        createdBy:this.productForm.get('createdBy')?.value,
+        reglementaire:this.productForm.get('reglementaire')?.value,
+
       });
       // Navigate to the next step
       this.stepper.next();

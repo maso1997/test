@@ -21,6 +21,7 @@ import { QuestionnaireComponent } from './components/questionnaire/questionnaire
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { RisqueEvaluationComponent } from './components/risque-evaluation/risque-evaluation.component';
 import { QuestionsComponent } from './components/questions/questions.component';
+import { FileUploadPageComponent } from './components/file-upload-page/file-upload-page.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +37,8 @@ import { QuestionsComponent } from './components/questions/questions.component';
     DashboardComponent,
     RisqueEvaluationComponent,
     QuestionsComponent,
+
+    FileUploadPageComponent,
 
     
     
