@@ -22,20 +22,20 @@ export class QuestionsComponent {
   subanswersChange = new EventEmitter<{ yes: (boolean | null)[]; no: (boolean | null)[] }[]>();
 
   handleRadioChange(index: number, value: boolean) {
+    // Sauvegarde de la réponse principale
     this.answers[index] = value;
     this.answersChange.emit(this.answers);
 
-    if (!this.subanswers[index]) {
-      this.subanswers[index] = { yes: [], no: [] };
-    }
-
+    // Initialisation des sous-réponses uniquement si la réponse est "Oui"
     if (value) {
-      if (!this.subanswers[index].yes) {
-        this.subanswers[index].yes = Array(this.questions[index].subquestions.yes.length).fill(null);
+      if (!this.subanswers[index]) {
+        this.subanswers[index] = { yes: [], no: [] };
       }
+      this.subanswers[index].yes = Array(this.questions[index].subquestions.yes.length).fill(null);
     } else {
-      if (!this.subanswers[index].no) {
-        this.subanswers[index].no = Array(this.questions[index].subquestions.no.length).fill(null);
+      // Si la réponse est "Non", on vide les sous-réponses associées
+      if (this.subanswers[index]) {
+        this.subanswers[index].yes = [];
       }
     }
   }
@@ -43,20 +43,21 @@ export class QuestionsComponent {
   handleSubquestionChange(
     questionIndex: number,
     subquestionIndex: number,
-    value: boolean,
-    type: 'yes' | 'no'
+    value: boolean
   ) {
+    // Initialiser les sous-réponses si nécessaire
     if (!this.subanswers[questionIndex]) {
       this.subanswers[questionIndex] = { yes: [], no: [] };
     }
 
-    if (!this.subanswers[questionIndex][type]) {
-      this.subanswers[questionIndex][type] = Array(
-        this.questions[questionIndex].subquestions[type].length
+    // Mettre à jour uniquement les sous-réponses pour "Oui"
+    if (!this.subanswers[questionIndex].yes) {
+      this.subanswers[questionIndex].yes = Array(
+        this.questions[questionIndex].subquestions.yes.length
       ).fill(null);
     }
 
-    this.subanswers[questionIndex][type][subquestionIndex] = value;
+    this.subanswers[questionIndex].yes[subquestionIndex] = value;
     this.subanswersChange.emit(this.subanswers);
   }
 }
