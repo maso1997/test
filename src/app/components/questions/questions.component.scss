@@ -25,3 +25,23 @@
     }
   }
   
+
+  .subquestions .subquestion {
+    font-size: 0.875rem; /* Smaller font size */
+    margin-left: 20px;   /* Indent subquestions */
+  }
+  
+  .subquestions .form-label {
+    margin-bottom: 4px;  /* Reduce space below the label */
+  }
+  
+  .subquestions .form-check {
+    margin-right: 15px;  /* Adjust spacing between options */
+  }
+
+
+  .form-label-sub {
+    display: block;
+    
+    margin-bottom: 10px;
+  }

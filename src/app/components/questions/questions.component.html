@@ -1,29 +1,82 @@
 <div class="card">
-    <div class="card-body">
-      <h5 class="card-title fw-bold">Questions par risque</h5>
-      <div *ngFor="let question of questions; let i = index" class="question-container mb-4">
-        <label class="form-label">{{ question.questionText }}</label>
-        <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            [name]="'question' + i"
-            [checked]="answers[i] === true"
-            (change)="handleRadioChange(i, true)"
-          />
-          <label class="form-check-label ms-2">Oui</label>
+  <div class="card-body">
+    <h5 class="card-title fw-bold">Questions par risque</h5>
+    <div *ngFor="let question of questions; let i = index" class="question-container mb-4">
+      <label class="form-label">{{ question.questionText }}</label>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="radio"
+          [name]="'question' + i"
+          [checked]="answers[i] === true"
+          (change)="handleRadioChange(i, true)"
+        />
+        <label class="form-check-label ms-2">Oui</label>
+      </div>
+      <div class="form-check form-check-inline">
+        <input
+          class="form-check-input"
+          type="radio"
+          [name]="'question' + i"
+          [checked]="answers[i] === false"
+          (change)="handleRadioChange(i, false)"
+        />
+        <label class="form-check-label ms-2">Non</label>
+      </div>
+
+      <!-- Subquestions for "Yes" -->
+      <div *ngIf="answers[i] === true" class="subquestions mt-3">
+        <div *ngFor="let subquestion of question.subquestions.yes; let j = index" class="mb-2 subquestion">
+          <label class="form-label-sub">{{ subquestion }}</label>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              [name]="'subquestionYes' + i + '-' + j"
+              [checked]="subanswers[i]?.yes && subanswers[i].yes[j] === true"
+              (change)="handleSubquestionChange(i, j, true, 'yes')"
+            />
+            <label class="form-check-label ms-2">Oui</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              [name]="'subquestionYes' + i + '-' + j"
+              [checked]="subanswers[i]?.yes && subanswers[i].yes[j] === false"
+              (change)="handleSubquestionChange(i, j, false, 'yes')"
+            />
+            <label class="form-check-label ms-2">Non</label>
+          </div>
         </div>
-        <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            [name]="'question' + i"
-            [checked]="answers[i] === false"
-            (change)="handleRadioChange(i, false)"
-          />
-          <label class="form-check-label ms-2">Non</label>
+      </div>
+
+      <!-- Subquestions for "No" -->
+      <div *ngIf="answers[i] === false" class="subquestions mt-3">
+        <div *ngFor="let subquestion of question.subquestions.no; let j = index" class="mb-2 subquestion">
+          <label class="form-label-sub">{{ subquestion }}</label>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              [name]="'subquestionNo' + i + '-' + j"
+              [checked]="subanswers[i]?.no && subanswers[i].no[j] === true"
+              (change)="handleSubquestionChange(i, j, true, 'no')"
+            />
+            <label class="form-check-label ms-2">Oui</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input
+              class="form-check-input"
+              type="radio"
+              [name]="'subquestionNo' + i + '-' + j"
+              [checked]="subanswers[i]?.no && subanswers[i].no[j] === false"
+              (change)="handleSubquestionChange(i, j, false, 'no')"
+            />
+            <label class="form-check-label ms-2">Non</label>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  
+</div>
