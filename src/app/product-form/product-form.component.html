@@ -176,6 +176,15 @@
                 <label class="form-check-label" for="reglementaireNon">Non</label>
               </div>
             </div>
+
+            
+            <div class="form-group mt-3">
+              <label for="dateChoice" class="form-label fw-bold">Date de Choix</label>
+              <input type="date" id="dateChoice" class="form-control" formControlName="dateChoice" />
+              <div *ngIf="productForm.get('dateChoice')?.invalid && productForm.get('dateChoice')?.touched" class="text-danger">
+                La date est requise.
+              </div>
+            </div>
         
             <!-- Documents -->
             <div class="col-md-12 mb-3">

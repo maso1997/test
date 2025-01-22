@@ -12,15 +12,17 @@ export class StepperComponent {
   productDescription: string = '';
   createdBy:string='';
   reglementaire:boolean=false;
+  dateChoice: string | null = null;
 
 
-  onProductDataReceived(data: { codeProduit:string,productName: string, description: string, createdBy: string, reglementaire:boolean }) {
-    this.codeProduit=data.codeProduit
+  onProductDataReceived(data: any) {
+    this.codeProduit = data.codeProduit;
     this.productName = data.productName;
     this.productDescription = data.description;
     this.createdBy = data.createdBy;
-    this.reglementaire=data.reglementaire;
-
+    this.reglementaire = data.reglementaire;
+    this.dateChoice = data.dateChoice; 
   }
+  
   productForm!: FormGroup; // The FormGroup from the product form will be passed to this component
 }

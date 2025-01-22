@@ -10,7 +10,7 @@ import { Tooltip } from 'bootstrap';
 })
 export class ProductFormComponent {
   @Input() stepper!: NbStepperComponent; 
-  @Output() productData = new EventEmitter<{ codeProduit:string,productName: string, description: string,createdBy:string,reglementaire:boolean }>(); // Emit product data// Input to control the stepper navigation
+  @Output() productData = new EventEmitter<{ codeProduit:string,productName: string, description: string,createdBy:string,reglementaire:boolean,dateChoice:string }>(); // Emit product data// Input to control the stepper navigation
 
   productForm: FormGroup;
   users = [
@@ -69,7 +69,9 @@ export class ProductFormComponent {
       coordinator: [{ value: 'Coordinateur Actif', disabled: true }], // No validators
       reglementaire: [false],
       nonreglementaire: [true],
-      createdBy: [{ value: 'Coordinateur Actif', disabled: true }] // No validators
+      createdBy: [{ value: 'Coordinateur Actif', disabled: true }],
+      dateChoice: [null, Validators.required]
+       // No validators
     });
   }
 
@@ -123,19 +125,18 @@ export class ProductFormComponent {
 
   onSubmit() {
     if (this.productForm.valid && this.selectedFiles.length > 0) {
-      // Emit product name and description to parent
       this.productData.emit({
-        codeProduit:this.productForm.get('codeProduit')?.value,
+        codeProduit: this.productForm.get('codeProduit')?.value,
         productName: this.productForm.get('productName')?.value,
         description: this.productForm.get('description')?.value,
-        createdBy:this.productForm.get('createdBy')?.value,
-        reglementaire:this.productForm.get('reglementaire')?.value,
-
+        createdBy: this.productForm.get('createdBy')?.value,
+        reglementaire: this.productForm.get('reglementaire')?.value,
+        dateChoice: this.productForm.get('dateChoice')?.value, // Include dateChoice
       });
-      // Navigate to the next step
       this.stepper.next();
     } else {
       this.productForm.markAllAsTouched();
     }
   }
+  
 }

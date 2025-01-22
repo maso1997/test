@@ -12,6 +12,7 @@ export class FileUploadPageComponent {
   @Input() productDescription: string = '';
   @Input() createdBy:string='';
   @Input() reglementaire:boolean=false;
+  @Input() dateChoice: string | null = ''; // Add dateChoice input
   @Input() stepper!: NbStepperComponent;
   
   selectedFiles: File[] = [];
