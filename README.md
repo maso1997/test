@@ -1,27 +1,188 @@
-# Banque
+package com.votreprojet.fccrbff.controllers;
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.12.
+import com.votreprojet.fccrbff.clients.FccrCoreClient;
+// Importez ici tous les DTOs dont vous avez besoin depuis votre package dto
+import com.votreprojet.fccrbff.dto.*; 
 
-## Development server
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+@RestController
+@RequestMapping("/api") // Le préfixe de base pour tous les appels venant du frontend
+public class ReferentielBffController {
 
-## Code scaffolding
+    @Autowired
+    private FccrCoreClient client;
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+    // =================================================================
+    // ==                     SEGMENTS                                ==
+    // =================================================================
+    @GetMapping("/segments")
+    public ResponseEntity<List<SegmentDTO>> findSegments() {
+        return ResponseEntity.ok(client.findSegments());
+    }
 
-## Build
+    @PostMapping("/segments")
+    public ResponseEntity<SegmentDTO> createSegment(@RequestBody SegmentDTO dto) {
+        return ResponseEntity.ok(client.createSegment(dto));
+    }
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+    @PutMapping("/segments/{id}")
+    public ResponseEntity<SegmentDTO> updateSegment(@PathVariable Long id, @RequestBody SegmentDTO dto) {
+        return ResponseEntity.ok(client.updateSegment(id, dto));
+    }
 
-## Running unit tests
+    @DeleteMapping("/segments/{id}")
+    public ResponseEntity<Void> deleteSegment(@PathVariable Long id) {
+        client.deleteSegment(id);
+        return ResponseEntity.noContent().build();
+    }
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
 
-## Running end-to-end tests
+    // =================================================================
+    // ==                      AREAS                                  ==
+    // =================================================================
+    @GetMapping("/areas")
+    public ResponseEntity<List<AreaDTO>> findAreas() {
+        return ResponseEntity.ok(client.findAreas());
+    }
+    
+    @PostMapping("/areas")
+    public ResponseEntity<AreaDTO> createArea(@RequestBody AreaDTO dto) {
+        return ResponseEntity.ok(client.createArea(dto));
+    }
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+    @PutMapping("/areas/{id}")
+    public ResponseEntity<AreaDTO> updateArea(@PathVariable Long id, @RequestBody AreaDTO dto) {
+        return ResponseEntity.ok(client.updateArea(id, dto));
+    }
 
-## Further help
+    @DeleteMapping("/areas/{id}")
+    public ResponseEntity<Void> deleteArea(@PathVariable Long id) {
+        client.deleteArea(id);
+        return ResponseEntity.noContent().build();
+    }
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+
+    // =================================================================
+    // ==                     LIST VALUES                             ==
+    // =================================================================
+    @GetMapping("/list-values")
+    public ResponseEntity<List<ListValueDTO>> findListValues() {
+        return ResponseEntity.ok(client.findListValues());
+    }
+    
+    @PostMapping("/list-values")
+    public ResponseEntity<ListValueDTO> createListValue(@RequestBody ListValueDTO dto) {
+        return ResponseEntity.ok(client.createListValue(dto));
+    }
+
+    @PutMapping("/list-values/{id}")
+    public ResponseEntity<ListValueDTO> updateListValue(@PathVariable Long id, @RequestBody ListValueDTO dto) {
+        return ResponseEntity.ok(client.updateListValue(id, dto));
+    }
+
+    @DeleteMapping("/list-values/{id}")
+    public ResponseEntity<Void> deleteListValue(@PathVariable Long id) {
+        client.deleteListValue(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    // =================================================================
+    // ==                  LIST VALUE ITEMS                           ==
+    // =================================================================
+    @GetMapping("/list-value-items")
+    public ResponseEntity<List<ListValueItemDTO>> findListValueItems() {
+        return ResponseEntity.ok(client.findListValueItems());
+    }
+
+    // Implémentez POST, PUT, DELETE pour ListValueItem...
+
+
+    // =================================================================
+    // ==                  RISQUE VALUE LISTS                         ==
+    // =================================================================
+    @GetMapping("/risque-value-lists")
+    public ResponseEntity<List<RisqueValueListDTO>> findRisqueValueLists() {
+        return ResponseEntity.ok(client.findRisqueValueLists());
+    }
+
+    // Implémentez POST, PUT, DELETE pour RisqueValueList...
+
+
+    // =================================================================
+    // ==                  RISQUE VALUE ITEMS                         ==
+    // =================================================================
+    @GetMapping("/risque-value-items")
+    public ResponseEntity<List<RisqueValueItemDTO>> findRisqueValueItems() {
+        return ResponseEntity.ok(client.findRisqueValueItems());
+    }
+
+    // Implémentez POST, PUT, DELETE pour RisqueValueItem...
+
+
+    // =================================================================
+    // ==                 FIELD CONFIGURATIONS                        ==
+    // =================================================================
+    @GetMapping("/field-configurations")
+    public ResponseEntity<List<FieldConfigurationDTO>> findFieldConfigurations() {
+        return ResponseEntity.ok(client.findFieldConfigurations());
+    }
+    
+    @PostMapping("/field-configurations")
+    public ResponseEntity<FieldConfigurationDTO> createFieldConfiguration(@RequestBody FieldConfigurationDTO dto) {
+        return ResponseEntity.ok(client.createFieldConfiguration(dto));
+    }
+
+    @PutMapping("/field-configurations/{id}")
+    public ResponseEntity<FieldConfigurationDTO> updateFieldConfiguration(@PathVariable Long id, @RequestBody FieldConfigurationDTO dto) {
+        return ResponseEntity.ok(client.updateFieldConfiguration(id, dto));
+    }
+
+    @DeleteMapping("/field-configurations/{id}")
+    public ResponseEntity<Void> deleteFieldConfiguration(@PathVariable Long id) {
+        client.deleteFieldConfiguration(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+    // =================================================================
+    // ==              VALUE ITEM / RISQUE ITEM (Associations)        ==
+    // =================================================================
+    @GetMapping("/value-item-risque-items")
+    public ResponseEntity<List<ValueItemRisqueItemDTO>> findValueItemRisqueItems() {
+        return ResponseEntity.ok(client.findValueItemRisqueItems());
+    }
+
+    // La logique POST, PUT, DELETE pour une table de jointure peut être plus complexe
+    // mais vous pouvez suivre le même modèle si elle est gérée comme une entité simple.
+
+}
+///////////////////////////////////////////////////////////////////////////////////
+
+// Dans votre fichier FccrCoreClient.java
+
+// ... méthodes existantes pour Segments, etc.
+
+// --- Endpoints pour Areas ---
+@GetMapping("/api/areas")
+List<AreaDTO> findAreas();
+
+@PostMapping("/api/areas")
+AreaDTO createArea(@RequestBody AreaDTO areaDTO);
+
+@PutMapping("/api/areas/{id}")
+AreaDTO updateArea(@PathVariable("id") Long id, @RequestBody AreaDTO areaDTO);
+
+@DeleteMapping("/api/areas/{id}")
+void deleteArea(@PathVariable("id") Long id);
+
+
+// --- Endpoints pour List Value Items ---
+@GetMapping("/api/list-value-items")
+List<ListValueItemDTO> findListValueItems();
+
+// Ajoutez toutes les autres signatures de la même manière...
