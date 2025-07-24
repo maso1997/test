@@ -56,7 +56,6 @@ export class AddNotationComponent implements OnInit {
       error: err => this.toaster.danger('Erreur chargement segment')
     });
   }
-
   submit(): void {
     if (this.fieldForm.invalid) {
       this.fieldForm.markAllAsTouched();
