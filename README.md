@@ -763,3 +763,250 @@ export class NotationService {
   }
 }
 
+//////////////old version ///////////////////////
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NbToastrService } from '@nebular/theme';
+import { GestionReferentielsService } from '../../gestion-referentiel/services/gestion-referentiels.service';
+import { Referentiel } from 'src/app/core/models/Referentiel';
+import { ReferentielTypes } from '../../traitement-demande/model/fieldConfig';
+import { NotationService } from '../notation.service';
+import { SegmentDtoVues } from '../model/segementDtoVue';
+import {  NbGlobalPhysicalPosition } from '@nebular/theme';
+
+@Component({
+  standalone: false,
+  selector: 'app-add-notation',
+  templateUrl: './add-notation.component.html',
+  styleUrl: './add-notation.component.scss'
+})
+export class AddNotationComponent implements OnInit {
+  fieldForm!: FormGroup;
+    selectedRef: string = "segments";
+     referentiels$ !: Referentiel[];
+       referentielTypes: ReferentielTypes[] = [];
+     segement: SegmentDtoVues = {} as SegmentDtoVues;
+
+  constructor(private fb: FormBuilder,private toasterService:NbToastrService,private serviceRef: GestionReferentielsService,private notationService:NotationService) {
+
+      this.referentielTypes  = [
+      {value:'segments', label:'Segment', hasExpression:false},
+      {value:'areas', label:'Area', hasExpression:false},
+      {value:'listValues', label:'List Value ', hasExpression:true},
+      {value:'listValueItems', label:'List Value Item', hasExpression:false},
+      {value:'risqueValueLists', label:'Risque Value', hasExpression:false},
+      {value:'risqueValueItems', label:'Risque Value Item', hasExpression:false},
+    ];
+
+this.fieldForm = this.fb.group({
+  segment: ['', Validators.required],
+  libelle: ['', Validators.required],
+  identifiantTiers: ['', Validators.required],
+  derniereNote: ['', Validators.required],
+  methodologie: ['', Validators.required],
+  utilisateur: ['', Validators.required],
+  statut: ['', Validators.required],
+});
+
+  }
+
+
+
+    ngOnInit(): void {
+           this.serviceRef.getReferentiel(this.selectedRef).subscribe(data => {
+        this.referentiels$ = data
+      })
+
+
+    }
+
+      onSegementChange(event: any) {
+         const selectedId = event?.id || null;
+      this.fieldForm.patchValue({ valueId: selectedId });
+    this.notationService.getSegmentById(event).subscribe({
+          next: (response) => {
+            this.segement= response;
+            console.log('Champ ajoute avec succès :', response);
+            console.log(this.segement);
+
+
+          },
+          error: (err:any) => {
+            console.error('Erreur lors de la création du champ :', err);
+          }
+        });
+      }
+
+  submit(): void {
+  // if (this.fieldForm.invalid) {
+  //   this.fieldForm.markAllAsTouched();
+  //   return;
+  // }
+
+  // const formData = this.fieldForm.value;
+
+  // const payload: any = {
+  //   segmentId: formData.segment,
+  //   identifiantTiers: formData.identifiantTiers,
+  //   derniereNote: formData.derniereNote,
+  //   methodologie: formData.methodologie,
+  //   utilisateur: formData.utilisateur,
+  //   statut: formData.statut,
+  //   areas: []
+  // };
+
+  // if (this.segement?.areas) {
+  //   for (const area of this.segement.areas) {
+  //     const areaPayload: any = {
+  //       areaId: area.id,
+  //       fieldConfigs: []
+  //     };
+
+  //     for (const config of area.fieldConfigurations) {
+  //       areaPayload.fieldConfigs.push({
+  //         fieldId: config.id,
+  //       });
+  //     }
+
+  //     payload.areas.push(areaPayload);
+  //   }
+  // }
+
+  // console.log('Payload soumis ✅', payload);
+
+  
+ 
+this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
+  status: 'success',
+  duration: 3000,
+  destroyByClick: true,
+  position: NbGlobalPhysicalPosition.TOP_RIGHT,
+  preventDuplicates: true
+});
+
+ this.fieldForm.reset();
+
+
+  }
+
+}
+<nb-card accent="">
+  <nb-card-header class="d-flex flex-row justify-content-between align-items-center">
+    <h5 class="title-heading text-uppercase my-auto p-2">
+     Notation
+    </h5>
+    
+  </nb-card-header>
+  <form [formGroup]="fieldForm" (ngSubmit)="submit()">
+
+     
+      <nb-card-body>
+        <nb-form-field fullWidth>
+          <nb-select
+            fullWidth
+            formControlName="segment"
+            placeholder="Sélectionner un segment"
+            [class.invalid]="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched"
+            (selectedChange)="onSegementChange($event)">
+            <nb-option *ngFor="let type of referentiels$" [value]="type.id">
+              {{ type.libelle }}
+            </nb-option>
+          </nb-select>
+        </nb-form-field>
+        <small class="error" *ngIf="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched">
+          Ce champ est requis.
+        </small>
+      </nb-card-body>
+
+<nb-card class="main-card">
+  <nb-card-header  class="title-heading text-uppercase my-auto p-2" >Informations principales</nb-card-header>
+  <nb-card-body>
+    <div class="form-grid">
+      <div class="form-row">
+        <label class="form-label">Identifiant de tiers noté</label>
+        <nb-form-field class="input-field">
+          <input nbInput fullWidth formControlName="identifiantTiers" placeholder="Ex. 123456" />
+        </nb-form-field>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Dernière note</label>
+        <nb-form-field class="input-field">
+          <input nbInput fullWidth formControlName="derniereNote" placeholder="Ex. 4.5" />
+        </nb-form-field>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Méthodologie</label>
+        <nb-form-field class="input-field">
+          <input nbInput fullWidth formControlName="methodologie" placeholder="Décrire la méthodologie" />
+        </nb-form-field>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Utilisateur</label>
+        <nb-form-field class="input-field">
+          <input nbInput fullWidth formControlName="utilisateur" placeholder="Nom d’utilisateur" />
+        </nb-form-field>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label">Status de la note</label>
+        <nb-form-field class="input-field">
+          <input nbInput fullWidth formControlName="statut" placeholder="Ex. Validé / Brouillon" />
+        </nb-form-field>
+      </div>
+    </div>
+  </nb-card-body>
+</nb-card>
+
+
+
+<ng-container *ngFor="let area of segement.areas">
+  <nb-card class="area-card">
+    <nb-card-header>
+      <strong>{{ area.libelle }}</strong>
+    </nb-card-header>
+    <nb-card-body>
+      <div
+        *ngFor="let config of area.fieldConfigurations"
+        class="field-row"
+      >
+        <div class="field-label">
+          <strong>{{ config.libelle }}</strong>
+        </div>
+        <div class="field-select">
+          <nb-form-field fullWidth>
+            <nb-select
+              fullWidth
+              [(ngModel)]="config.risqueValueList"
+            >
+              <nb-option
+                *ngFor="let item of config.risqueValueList"
+                [value]="item.listValueItem?.id"
+              >
+                {{ item.listValueItem?.libelle }}
+              </nb-option>
+            </nb-select>
+          </nb-form-field>
+        </div>
+      </div>
+    </nb-card-body>
+  </nb-card>
+</ng-container>
+
+
+    <nb-card class="actions-cards">
+      <nb-card-body class="actions">
+ <button nbButton status="primary" type="submit">
+    <nb-icon icon="checkmark-outline"></nb-icon>
+    Valider
+  </button>
+
+      </nb-card-body>
+    </nb-card>
+
+
+
+  </form>
+</nb-card>
