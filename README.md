@@ -1010,3 +1010,89 @@ this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
 
   </form>
 </nb-card>
+{
+    "id": 10000,
+    "code": "PP",
+    "libelle": "Personne physique",
+    "areas": [
+        {
+            "id": 10000,
+            "code": "Donnees_Tiers",
+            "libelle": "Données Tiers",
+            "fieldConfigurations": [
+                {
+                    "id": 10000,
+                    "code": "Nom",
+                    "libelle": "Nom",
+                    "type": "TEXT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10001,
+                    "code": "Prenom",
+                    "libelle": "Prénom",
+                    "type": "TEXT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10002,
+                    "code": "Date_de_naissance",
+                    "libelle": "Date de naissance",
+                    "type": "DATE",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10003,
+                    "code": "Role",
+                    "libelle": "Rôle",
+                    "type": "SELECT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10004,
+                    "code": "Sexe",
+                    "libelle": "Sexe",
+                    "type": "SELECT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10007,
+                    "code": "Date_activite",
+                    "libelle": "Date d'activité",
+                    "type": "DATE",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10008,
+                    "code": "Pays_residence_fiscal",
+                    "libelle": "Pays de résidence fiscal",
+                    "type": "SELECT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                },
+                {
+                    "id": 10010,
+                    "code": "Pays_souscription",
+                    "libelle": "Pays de souscription",
+                    "type": "SELECT",
+                    "expression": null,
+                    "risqueValueList": [],
+                    "selected": true
+                }
+            ]
+        }
+    ]
+}
