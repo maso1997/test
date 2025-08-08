@@ -804,11 +804,6 @@ export class AddNotationComponent implements OnInit {
 this.fieldForm = this.fb.group({
   segment: ['', Validators.required],
   libelle: ['', Validators.required],
-  identifiantTiers: ['', Validators.required],
-  derniereNote: ['', Validators.required],
-  methodologie: ['', Validators.required],
-  utilisateur: ['', Validators.required],
-  statut: ['', Validators.required],
 });
 
   }
