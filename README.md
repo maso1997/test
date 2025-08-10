@@ -1714,5 +1714,712 @@ export interface RisqueValueItemVueDto {
   libelle: string;
   weight: RisqueItemWeightDto;
 }
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+architecture proposée.
 
+Backend Java (Spring Boot, JPA)
 
+Entités
+
+@Entity
+@Table(name = "notations")
+public class Notation {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "segment_id")
+private Segment segment;
+
+private LocalDateTime dateSaisie;
+private BigDecimal totalScore;
+
+@OneToMany(mappedBy = "notation", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<NotationValue> values = new ArrayList<>();
+
+// getters/setters
+}
+
+@Entity
+@Table(name = "notation_values")
+public class NotationValue {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "notation_id")
+private Notation notation;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "field_configuration_id")
+private FieldConfiguration fieldConfiguration;
+
+private String type; // text | date | boolean | select
+private String rawValue; // ISO string / boolean as string / text
+private BigDecimal score; // score partiel du champ
+
+@OneToMany(mappedBy = "notationValue", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<NotationValueSelect> selects = new ArrayList<>();
+
+// getters/setters
+}
+
+@Entity
+@Table(name = "notation_value_selects")
+public class NotationValueSelect {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "notation_value_id")
+private NotationValue notationValue;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "list_value_item_id")
+private ListValueItem listValueItem;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "risque_value_item_id")
+private RisqueValueItem risqueValueItem;
+
+private BigDecimal weightApplied;
+private BigDecimal score;
+
+// getters/setters
+}
+
+DTOs
+
+public class NotationItemCreateDTO {
+private Long fieldConfigurationId;
+private String type; // text | date | boolean | select
+private String value; // pour text/date/boolean (stringifié)
+private List<Long> selectedValueItemIds; // pour select
+// getters/setters
+}
+
+public class NotationCreateDTO {
+private Long segmentId;
+private List<NotationItemCreateDTO> items;
+// getters/setters
+}
+
+public class NotationDTO {
+private Long id;
+private Long segmentId;
+private BigDecimal totalScore;
+private LocalDateTime dateSaisie;
+// getters/setters
+}
+
+Repositories
+
+public interface NotationRepository extends JpaRepository<Notation, Long> {}
+public interface NotationValueRepository extends JpaRepository<NotationValue, Long> {}
+public interface NotationValueSelectRepository extends JpaRepository<NotationValueSelect, Long> {}
+
+Services (poids + fonction sont mockés pour l’exemple)
+
+@Service
+public class WeightService {
+public BigDecimal findWeight(FieldConfiguration fc, Long riskId) {
+// TODO: récupérer le poids réel depuis la config/BDD
+return BigDecimal.ONE; // défaut = 1
+}
+}
+
+@Service
+public class FonctionService {
+// Retourne un multiplicateur selon la fonction et data externe (ex: max 12 mois)
+public BigDecimal adjustWithFonction(FieldConfiguration fc, Long valueItemId, Long riskId) {
+if (!fc.isFonction()) return BigDecimal.ONE;
+switch (fc.getFonctionType()) {
+case PRODUIT:
+// TODO: lire table produit_stats et prendre MAX sur 12 mois
+return BigDecimal.valueOf(1.5);
+case CASH:
+case CONTRACT:
+case PAYE:
+// TODO: implémenter règles
+return BigDecimal.ONE;
+default:
+return BigDecimal.ONE;
+}
+}
+}
+
+@Service
+public class RuleService {
+public BigDecimal scoreNonSelect(FieldConfiguration fc, String rawValue) {
+// Exemple simple: boolean true = 1, false = 0
+if ("boolean".equalsIgnoreCase(fc.getType())) {
+return "true".equalsIgnoreCase(rawValue) ? BigDecimal.ONE : BigDecimal.ZERO;
+}
+return BigDecimal.ZERO;
+}
+}
+
+@Service
+public class NotationService {
+
+private final NotationRepository notationRepo;
+private final FieldConfigurationRepository fieldConfigRepo;
+private final SegmentRepository segmentRepo;
+private final WeightService weightService;
+private final FonctionService fonctionService;
+private final RuleService ruleService;
+
+public NotationService(NotationRepository notationRepo,
+FieldConfigurationRepository fieldConfigRepo,
+SegmentRepository segmentRepo,
+WeightService weightService,
+FonctionService fonctionService,
+RuleService ruleService) {
+this.notationRepo = notationRepo;
+this.fieldConfigRepo = fieldConfigRepo;
+this.segmentRepo = segmentRepo;
+this.weightService = weightService;
+this.fonctionService = fonctionService;
+this.ruleService = ruleService;
+}
+
+@Transactional
+public NotationDTO save(NotationCreateDTO dto) {
+Segment segment = segmentRepo.findById(dto.getSegmentId())
+.orElseThrow(() -> new RuntimeException("Segment introuvable"));
+
+text
+Notation notation = new Notation();
+notation.setSegment(segment);
+notation.setDateSaisie(LocalDateTime.now());
+
+BigDecimal total = BigDecimal.ZERO;
+
+for (NotationItemCreateDTO it : dto.getItems()) {
+  FieldConfiguration fc = fieldConfigRepo.findById(it.getFieldConfigurationId())
+    .orElseThrow(() -> new RuntimeException("FieldConfiguration introuvable: " + it.getFieldConfigurationId()));
+
+  NotationValue nv = new NotationValue();
+  nv.setNotation(notation);
+  nv.setFieldConfiguration(fc);
+  nv.setType(fc.getType());
+
+  BigDecimal scoreField = BigDecimal.ZERO;
+
+  if ("select".equalsIgnoreCase(fc.getType())) {
+    if (it.getSelectedValueItemIds() == null || it.getSelectedValueItemIds().isEmpty()) {
+      // passer si non obligatoire, sinon throw
+      nv.setScore(BigDecimal.ZERO);
+    } else {
+      // map listValueItem -> risqueValueItem depuis la config
+      Map<Long, Long> valueToRisk = fc.getValueItemRisqueItem().stream()
+        .collect(Collectors.toMap(m -> m.getListValueItem().getId(), m -> m.getRisqueValueItem().getId()));
+
+      for (Long valueItemId : it.getSelectedValueItemIds()) {
+        Long riskId = valueToRisk.get(valueItemId);
+        if (riskId == null) throw new RuntimeException("Aucun risque mappé pour item: " + valueItemId);
+
+        BigDecimal poids = weightService.findWeight(fc, riskId);
+        BigDecimal func = fonctionService.adjustWithFonction(fc, valueItemId, riskId);
+        BigDecimal itemScore = poids.multiply(func);
+
+        NotationValueSelect nvs = new NotationValueSelect();
+        nvs.setNotationValue(nv);
+        nvs.setListValueItem(new ListValueItem(valueItemId));
+        nvs.setRisqueValueItem(new RisqueValueItem(riskId));
+        nvs.setWeightApplied(poids);
+        nvs.setScore(itemScore);
+        nv.getSelects().add(nvs);
+
+        scoreField = scoreField.add(itemScore);
+      }
+      nv.setScore(scoreField);
+    }
+  } else {
+    nv.setRawValue(it.getValue());
+    scoreField = ruleService.scoreNonSelect(fc, it.getValue());
+    nv.setScore(scoreField);
+  }
+
+  notation.getValues().add(nv);
+  total = total.add(scoreField);
+}
+
+notation.setTotalScore(total);
+notationRepo.save(notation);
+
+NotationDTO out = new NotationDTO();
+out.setId(notation.getId());
+out.setSegmentId(segment.getId());
+out.setTotalScore(total);
+out.setDateSaisie(notation.getDateSaisie());
+return out;
+}
+
+public NotationDTO getById(Long id) {
+Notation n = notationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notation introuvable"));
+NotationDTO dto = new NotationDTO();
+dto.setId(n.getId());
+dto.setSegmentId(n.getSegment().getId());
+dto.setTotalScore(n.getTotalScore());
+dto.setDateSaisie(n.getDateSaisie());
+return dto;
+}
+}
+
+Contrôleur
+
+@RestController
+@RequestMapping("/api/notations")
+public class NotationController {
+
+private final NotationService notationService;
+
+public NotationController(NotationService notationService) {
+this.notationService = notationService;
+}
+
+@PostMapping
+public ResponseEntity<NotationDTO> create(@RequestBody NotationCreateDTO dto) {
+NotationDTO out = notationService.save(dto);
+return ResponseEntity.status(HttpStatus.CREATED).body(out);
+}
+
+@GetMapping("/{id}")
+public ResponseEntity<NotationDTO> get(@PathVariable Long id) {
+return ResponseEntity.ok(notationService.getById(id));
+}
+}
+
+SQL minimal (PostgreSQL)
+
+CREATE TABLE notations (
+id BIGSERIAL PRIMARY KEY,
+segment_id BIGINT NOT NULL,
+date_saisie TIMESTAMP NOT NULL,
+total_score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE notation_values (
+id BIGSERIAL PRIMARY KEY,
+notation_id BIGINT NOT NULL REFERENCES notations(id) ON DELETE CASCADE,
+field_configuration_id BIGINT NOT NULL,
+type VARCHAR(32) NOT NULL,
+raw_value TEXT,
+score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE notation_value_selects (
+id BIGSERIAL PRIMARY KEY,
+notation_value_id BIGINT NOT NULL REFERENCES notation_values(id) ON DELETE CASCADE,
+list_value_item_id BIGINT NOT NULL,
+risque_value_item_id BIGINT NOT NULL,
+weight_applied NUMERIC(18,6),
+score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+Frontend Angular
+
+Service HTTP
+
+@Injectable({ providedIn: 'root' })
+export class NotationService {
+constructor(private http: HttpClient) {}
+private base = '/api/notations';
+
+create(payload: any) {
+return this.http.post(this.base, payload);
+}
+
+getById(id: number) {
+return this.http.get(${this.base}/${id});
+}
+}
+
+Construction du payload dans un composant
+
+submit() {
+const payload = {
+segmentId: this.selectedSegmentId,
+items: [] as any[]
+};
+
+for (const area of this.segment.areas) {
+for (const fc of area.fieldConfigurations) {
+const ctrl = this.form.get('f_' + fc.id);
+if (fc.type === 'select') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'select',
+selectedValueItemIds: ctrl?.value || []
+});
+} else if (fc.type === 'boolean') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'boolean',
+value: ctrl?.value === true ? 'true' : 'false'
+});
+} else if (fc.type === 'date') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'date',
+value: ctrl?.value ? new Date(ctrl.value).toISOString() : null
+});
+} else {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'text',
+value: ctrl?.value ?? ''
+});
+}
+}
+}
+
+this.notationService.create(payload).subscribe({
+next: (res) => { /* toast success / },
+error: (err) => { / afficher message */ }
+});
+}
+
+Exemple de mapping “valueItem -> risque” côté FieldConfiguration
+
+Hypothèse: FieldConfiguration a une collection valueItemRisqueItem (liste d’objets avec listValueItem et risqueValueItem)
+
+Si vous n’avez pas encore l’entité, vous pouvez créer:
+
+@Entity
+@Table(name = "field_valueitem_risqueitem")
+public class FieldValueItemRisqueItem {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "field_configuration_id")
+private FieldConfiguration fieldConfiguration;
+
+@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "list_value_item_id")
+private ListValueItem listValueItem;
+
+@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "risque_value_item_id")
+private RisqueValueItem risqueValueItem;
+}
+///////////////////////////////////////////HTHH//////////////////////////////////////////////
+
+Entities (domaine)
+
+Fichier: src/main/java/com/example/domain/Notation.java
+@Entity
+@Table(name = "notations")
+public class Notation {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "segment_id", nullable = false)
+private Segment segment;
+
+private LocalDateTime dateSaisie;
+
+// totalScore = 0 pour le moment, calculé plus tard
+@Column(nullable = false)
+private BigDecimal totalScore = BigDecimal.ZERO;
+
+@OneToMany(mappedBy = "notation", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<NotationValue> values = new ArrayList<>();
+
+// getters/setters
+}
+
+Fichier: src/main/java/com/example/domain/NotationValue.java
+@Entity
+@Table(name = "notation_values")
+public class NotationValue {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "notation_id", nullable = false)
+private Notation notation;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "field_configuration_id", nullable = false)
+private FieldConfiguration fieldConfiguration;
+
+// on fige le type au moment de la saisie (utile si la config change)
+@Column(nullable = false)
+private String type; // text | date | boolean | select
+
+// pour text/date/boolean (stringifié). Pour select, laisser null.
+@Column(columnDefinition = "text")
+private String rawValue;
+
+// score partiel = 0 pour le moment
+@Column(nullable = false)
+private BigDecimal score = BigDecimal.ZERO;
+
+@OneToMany(mappedBy = "notationValue", cascade = CascadeType.ALL, orphanRemoval = true)
+private List<NotationValueSelect> selects = new ArrayList<>();
+
+// getters/setters
+}
+
+Fichier: src/main/java/com/example/domain/NotationValueSelect.java
+@Entity
+@Table(name = "notation_value_selects")
+public class NotationValueSelect {
+@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+private Long id;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "notation_value_id", nullable = false)
+private NotationValue notationValue;
+
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "list_value_item_id", nullable = false)
+private ListValueItem listValueItem;
+
+// on laisse nul pour le moment; sera rempli lors du calcul
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "risque_value_item_id")
+private RisqueValueItem risqueValueItem;
+
+// poids et score à 0 pour le moment
+@Column(nullable = false)
+private BigDecimal weightApplied = BigDecimal.ZERO;
+
+@Column(nullable = false)
+private BigDecimal score = BigDecimal.ZERO;
+
+// getters/setters
+}
+
+Remarques:
+
+Segment, FieldConfiguration, ListValueItem, RisqueValueItem: utilise tes classes existantes (ou mets des stubs si besoin).
+
+type est copié depuis FieldConfiguration.getType() au moment du save.
+
+DTOs (entrées/sorties API)
+
+Fichier: src/main/java/com/example/api/dto/NotationItemCreateDTO.java
+public class NotationItemCreateDTO {
+private Long fieldConfigurationId;
+private String type; // text|date|boolean|select (optionnel si tu veux le déduire côté back)
+private String value; // text/date/boolean stringifié
+private List<Long> selectedValueItemIds; // pour select
+// getters/setters
+}
+
+Fichier: src/main/java/com/example/api/dto/NotationCreateDTO.java
+public class NotationCreateDTO {
+private Long segmentId;
+private List<NotationItemCreateDTO> items;
+// getters/setters
+}
+
+Fichier: src/main/java/com/example/api/dto/NotationDTO.java
+public class NotationDTO {
+private Long id;
+private Long segmentId;
+private LocalDateTime dateSaisie;
+private BigDecimal totalScore; // 0 pour le moment
+// getters/setters
+}
+
+Repositories
+
+Fichier: src/main/java/com/example/repository/NotationRepository.java
+public interface NotationRepository extends JpaRepository<Notation, Long> {}
+
+Fichier: src/main/java/com/example/repository/NotationValueRepository.java
+public interface NotationValueRepository extends JpaRepository<NotationValue, Long> {}
+
+Fichier: src/main/java/com/example/repository/NotationValueSelectRepository.java
+public interface NotationValueSelectRepository extends JpaRepository<NotationValueSelect, Long> {}
+
+Service (save sans calcul, mais prêt pour ajouter la logique)
+
+Fichier: src/main/java/com/example/service/NotationService.java
+@Service
+public class NotationService {
+
+private final NotationRepository notationRepo;
+private final SegmentRepository segmentRepo;
+private final FieldConfigurationRepository fieldConfigRepo;
+
+public NotationService(NotationRepository notationRepo,
+SegmentRepository segmentRepo,
+FieldConfigurationRepository fieldConfigRepo) {
+this.notationRepo = notationRepo;
+this.segmentRepo = segmentRepo;
+this.fieldConfigRepo = fieldConfigRepo;
+}
+
+@Transactional
+public NotationDTO save(NotationCreateDTO dto) {
+Segment segment = segmentRepo.findById(dto.getSegmentId())
+.orElseThrow(() -> new IllegalArgumentException("Segment introuvable: " + dto.getSegmentId()));
+
+text
+Notation notation = new Notation();
+notation.setSegment(segment);
+notation.setDateSaisie(LocalDateTime.now());
+notation.setTotalScore(BigDecimal.ZERO); // pas de calcul pour le moment
+
+if (dto.getItems() != null) {
+  for (NotationItemCreateDTO it : dto.getItems()) {
+    FieldConfiguration fc = fieldConfigRepo.findById(it.getFieldConfigurationId())
+      .orElseThrow(() -> new IllegalArgumentException("FieldConfiguration introuvable: " + it.getFieldConfigurationId()));
+
+    NotationValue nv = new NotationValue();
+    nv.setNotation(notation);
+    nv.setFieldConfiguration(fc);
+    nv.setType(fc.getType()); // on fige le type depuis la config
+    nv.setScore(BigDecimal.ZERO); // sera calculé plus tard
+
+    if ("select".equalsIgnoreCase(fc.getType())) {
+      List<Long> selectedIds = (it.getSelectedValueItemIds() == null) ? List.of() : it.getSelectedValueItemIds();
+      for (Long valueItemId : selectedIds) {
+        NotationValueSelect nvs = new NotationValueSelect();
+        nvs.setNotationValue(nv);
+        nvs.setListValueItem(new ListValueItem(valueItemId)); // référence par id
+        // risque/poids/score seront calculés plus tard
+        nvs.setRisqueValueItem(null);
+        nvs.setWeightApplied(BigDecimal.ZERO);
+        nvs.setScore(BigDecimal.ZERO);
+        nv.getSelects().add(nvs);
+      }
+    } else {
+      // text/date/boolean en string, tel que reçu
+      nv.setRawValue(it.getValue());
+    }
+
+    notation.getValues().add(nv);
+  }
+}
+
+notationRepo.save(notation);
+
+NotationDTO out = new NotationDTO();
+out.setId(notation.getId());
+out.setSegmentId(segment.getId());
+out.setDateSaisie(notation.getDateSaisie());
+out.setTotalScore(notation.getTotalScore()); // 0
+return out;
+}
+
+@Transactional(readOnly = true)
+public NotationDTO getById(Long id) {
+Notation n = notationRepo.findById(id)
+.orElseThrow(() -> new NoSuchElementException("Notation introuvable: " + id));
+
+text
+NotationDTO dto = new NotationDTO();
+dto.setId(n.getId());
+dto.setSegmentId(n.getSegment().getId());
+dto.setDateSaisie(n.getDateSaisie());
+dto.setTotalScore(n.getTotalScore());
+return dto;
+}
+}
+
+Controller
+
+Fichier: src/main/java/com/example/api/NotationController.java
+@RestController
+@RequestMapping("/api/notations")
+public class NotationController {
+
+private final NotationService service;
+
+public NotationController(NotationService service) {
+this.service = service;
+}
+
+@PostMapping
+public ResponseEntity<NotationDTO> create(@RequestBody NotationCreateDTO dto) {
+NotationDTO out = service.save(dto);
+return ResponseEntity.status(HttpStatus.CREATED).body(out);
+}
+
+@GetMapping("/{id}")
+public ResponseEntity<NotationDTO> get(@PathVariable Long id) {
+return ResponseEntity.ok(service.getById(id));
+}
+}
+
+SQL (PostgreSQL)
+
+Fichier: db/migration/V1__create_notation_tables.sql
+CREATE TABLE notations (
+id BIGSERIAL PRIMARY KEY,
+segment_id BIGINT NOT NULL,
+date_saisie TIMESTAMP NOT NULL,
+total_score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE notation_values (
+id BIGSERIAL PRIMARY KEY,
+notation_id BIGINT NOT NULL REFERENCES notations(id) ON DELETE CASCADE,
+field_configuration_id BIGINT NOT NULL,
+type VARCHAR(32) NOT NULL,
+raw_value TEXT,
+score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+CREATE TABLE notation_value_selects (
+id BIGSERIAL PRIMARY KEY,
+notation_value_id BIGINT NOT NULL REFERENCES notation_values(id) ON DELETE CASCADE,
+list_value_item_id BIGINT NOT NULL,
+risque_value_item_id BIGINT NULL,
+weight_applied NUMERIC(18,6) NOT NULL DEFAULT 0,
+score NUMERIC(18,6) NOT NULL DEFAULT 0
+);
+
+Frontend: payload (exemple)
+
+Fichier: src/app/services/notation.service.ts
+@Injectable({ providedIn: 'root' })
+export class NotationService {
+private base = '/api/notations';
+constructor(private http: HttpClient) {}
+create(payload: any) { return this.http.post(this.base, payload); }
+getById(id: number) { return this.http.get(${this.base}/${id}); }
+}
+
+Fichier: src/app/components/notation-form/notation-form.component.ts (extrait submit)
+submit() {
+const payload = { segmentId: this.selectedSegmentId, items: [] as any[] };
+
+for (const area of this.segment.areas) {
+for (const fc of area.fieldConfigurations) {
+const ctrl = this.form.get('f_' + fc.id);
+if (fc.type === 'select') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'select',
+selectedValueItemIds: ctrl?.value || []
+});
+} else if (fc.type === 'boolean') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'boolean',
+value: ctrl?.value === true ? 'true' : 'false'
+});
+} else if (fc.type === 'date') {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'date',
+value: ctrl?.value ? new Date(ctrl.value).toISOString() : null
+});
+} else {
+payload.items.push({
+fieldConfigurationId: fc.id,
+type: 'text',
+value: ctrl?.value ?? ''
+});
+}
+}
+}
+
+this.notationService.create(payload).subscribe();
+}
