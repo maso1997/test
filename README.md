@@ -2086,3 +2086,1152 @@ public class SegmentServiceImpl implements ISegmentService {
                 .collect(Collectors.toList());
     }
 }
+
+
+
+{
+    "id": 1000,
+    "code": "assoc",
+    "libelle": "association",
+    "areas": [
+        {
+            "id": 1000,
+            "code": "Réputation",
+            "libelle": "Réputation",
+            "fieldConfigurations": [
+                {
+                    "id": 1000,
+                    "code": "Négative News",
+                    "libelle": "Négative News",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1001,
+                    "code": "Négative News Corruption",
+                    "libelle": "Négative News Corruption",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1002,
+                    "code": "Sanction",
+                    "libelle": "Sanction",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1003,
+                    "code": "Sanction Incident",
+                    "libelle": "Sanction Incident",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1004,
+                    "code": "PPE / SPO",
+                    "libelle": "PPE / SPO",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        },
+        {
+            "id": 1001,
+            "code": "Géolocalisation",
+            "libelle": "Géolocalisation",
+            "fieldConfigurations": [
+                {
+                    "id": 1012,
+                    "code": "Pays de résidence fiscal",
+                    "libelle": "Pays de résidence fiscal",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2011,
+                            "listValueItem": {
+                                "id": 1011,
+                                "code": "Marakech",
+                                "libelle": "Marakech"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2010,
+                            "listValueItem": {
+                                "id": 1010,
+                                "code": "casablanca",
+                                "libelle": "casablanca"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1013,
+                    "code": "Pays de citoyenneté",
+                    "libelle": "Pays de citoyenneté",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2015,
+                            "listValueItem": {
+                                "id": 1013,
+                                "code": "Rabat",
+                                "libelle": "Rabat"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2014,
+                            "listValueItem": {
+                                "id": 1012,
+                                "code": "fas",
+                                "libelle": "fas"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1014,
+                    "code": "Pays de souscription",
+                    "libelle": "Pays de souscription",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2012,
+                            "listValueItem": {
+                                "id": 1014,
+                                "code": "chafchaoun",
+                                "libelle": "chafchaoun"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2013,
+                            "listValueItem": {
+                                "id": 1015,
+                                "code": "Ouazane",
+                                "libelle": "Ouazane"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        },
+        {
+            "id": 1002,
+            "code": "Données Tiers",
+            "libelle": "Données Tiers",
+            "fieldConfigurations": [
+                {
+                    "id": 1005,
+                    "code": "Rôle",
+                    "libelle": "Rôle",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2000,
+                            "listValueItem": {
+                                "id": 1000,
+                                "code": "Client",
+                                "libelle": "Client"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2001,
+                            "listValueItem": {
+                                "id": 1001,
+                                "code": "Tiers lié à Client",
+                                "libelle": "Tiers lié à Client"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2002,
+                            "listValueItem": {
+                                "id": 1002,
+                                "code": "FSP",
+                                "libelle": "FSP"
+                            },
+                            "risqueValueItem": {
+                                "id": 1002,
+                                "code": "MED_HIGH",
+                                "libelle": "MED_HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3002,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1002,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3005,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1006,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1006,
+                    "code": "Sexe",
+                    "libelle": "Sexe",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2003,
+                            "listValueItem": {
+                                "id": 1003,
+                                "code": "Féminin",
+                                "libelle": "Féminin"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2004,
+                            "listValueItem": {
+                                "id": 1004,
+                                "code": "Masculin",
+                                "libelle": "Masculin"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1007,
+                    "code": "Inactivité",
+                    "libelle": "Inactivité",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2006,
+                            "listValueItem": {
+                                "id": 1009,
+                                "code": "Actif",
+                                "libelle": "Actif"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2005,
+                            "listValueItem": {
+                                "id": 1008,
+                                "code": "Inactif",
+                                "libelle": "Inactif"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1008,
+                    "code": "Pays de naissance",
+                    "libelle": "Pays de naissance",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 2007,
+                            "listValueItem": {
+                                "id": 1005,
+                                "code": "MAR",
+                                "libelle": "MAROC"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2008,
+                            "listValueItem": {
+                                "id": 1006,
+                                "code": "TUN",
+                                "libelle": "TUNIS"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2009,
+                            "listValueItem": {
+                                "id": 1007,
+                                "code": "ALG",
+                                "libelle": "ALGERIE"
+                            },
+                            "risqueValueItem": {
+                                "id": 1002,
+                                "code": "MED_HIGH",
+                                "libelle": "MED_HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3002,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1002,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3005,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1006,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1009,
+                    "code": "Nom",
+                    "libelle": "Nom",
+                    "type": "text",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1010,
+                    "code": "Prénom",
+                    "libelle": "Prénom",
+                    "type": "text",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1011,
+                    "code": "Date de naissance",
+                    "libelle": "Date de naissance",
+                    "type": "date",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        },
+        {
+            "id": 1003,
+            "code": "Activité",
+            "libelle": "Activité",
+            "fieldConfigurations": [
+                {
+                    "id": 1016,
+                    "code": "Lien avec l'environnement",
+                    "libelle": "Lien avec l'environnement",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 1015,
+                    "code": "Apporteur d'affaire et assimilé *",
+                    "libelle": "Apporteur d'affaire et assimilé *",
+                    "type": "boolean",
+                    "expression": null,
+                    "risqueValueList": null,
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "code": "produit",
+            "libelle": "produit",
+            "fieldConfigurations": [
+                {
+                    "id": 1,
+                    "code": "produit",
+                    "libelle": "produit",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 1,
+                            "listValueItem": {
+                                "id": 1,
+                                "code": "App",
+                                "libelle": "App"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 2,
+                            "listValueItem": {
+                                "id": 2,
+                                "code": "Carte",
+                                "libelle": "Carte"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "code": "managment",
+            "libelle": "managment",
+            "fieldConfigurations": [
+                {
+                    "id": 2,
+                    "code": "managment",
+                    "libelle": "managment",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 3,
+                            "listValueItem": {
+                                "id": 3,
+                                "code": "mana",
+                                "libelle": "mana"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 4,
+                            "listValueItem": {
+                                "id": 4,
+                                "code": "INFO",
+                                "libelle": "INFO"
+                            },
+                            "risqueValueItem": {
+                                "id": 1002,
+                                "code": "MED_HIGH",
+                                "libelle": "MED_HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3002,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1002,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3005,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1002,
+                                        "fieldConfigDtoId": 1006,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 4,
+                    "code": "test",
+                    "libelle": "test",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 6,
+                            "listValueItem": {
+                                "id": 6,
+                                "code": "hola",
+                                "libelle": "hola"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 5,
+                            "listValueItem": {
+                                "id": 5,
+                                "code": "fccr",
+                                "libelle": "fccr"
+                            },
+                            "risqueValueItem": {
+                                "id": 1001,
+                                "code": "HIGH",
+                                "libelle": "HIGH",
+                                "weights": [
+                                    {
+                                        "id": 3001,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1001,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3004,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1001,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                },
+                {
+                    "id": 5,
+                    "code": "erer",
+                    "libelle": "erer",
+                    "type": "select",
+                    "expression": null,
+                    "risqueValueList": [
+                        {
+                            "id": 8,
+                            "listValueItem": {
+                                "id": 8,
+                                "code": "zz",
+                                "libelle": "zz"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "id": 7,
+                            "listValueItem": {
+                                "id": 7,
+                                "code": "vvvvvvv",
+                                "libelle": "vvvvvvv"
+                            },
+                            "risqueValueItem": {
+                                "id": 1000,
+                                "code": "LOW",
+                                "libelle": "LOW",
+                                "weights": [
+                                    {
+                                        "id": 3000,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1000,
+                                        "areaId": 1000
+                                    },
+                                    {
+                                        "id": 3003,
+                                        "weightL": 0,
+                                        "weightMl": 0,
+                                        "weightMh": 0,
+                                        "risqueValueItemDtoId": 1000,
+                                        "fieldConfigDtoId": 1005,
+                                        "areaId": 1002
+                                    }
+                                ]
+                            }
+                        }
+                    ],
+                    "selected": true,
+                    "customBloc": null,
+                    "risqueValueId": 1000,
+                    "searchable": true,
+                    "dateBloc": null,
+                    "selectBoolean": false
+                }
+            ]
+        }
+    ]
+}
