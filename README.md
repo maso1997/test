@@ -1,863 +1,387 @@
 
-besoin ::::: 'ai cree fonction si cette fonction est coche je doit a prendre on consideration l'elment choisi dans la liste exemple caqlcule produit je doit prendre le risque de cette de chaque value iteme choisit et je l'ajoute avec un exele que je veux te fournit je veux le merger avec les de l'exel prend le plus eleve de les derniere 12 mois quand je fait le save de cette objet parce que ce n'est pas fonctionne on s'abmit att je te donne le code pour mieu comprendre ok
-
-
-
-public class Segment {
-        @Id
-        @GeneratedValue(strategy = GenerationType.IDENTITY)
-        private Long id;
-
-        @Column(nullable = false, length = 100, unique = true)
-        private String code ;
-
-        @Column(nullable = false, length = 255)
-        private String libelle;
-
-        @OneToMany(
-            mappedBy = "segment",
-            cascade = CascadeType.ALL,
-            orphanRemoval = true,
-            fetch = FetchType.LAZY
-        )
-        private List<Area> areas = new ArrayList<>();
-
-
-public class SegmentDtoVues {
-    private Long id;
-    private String code;
-    private String libelle;
-    private List<AreasVueDto> areas;
-
-    
-public class AreasVueDto {
-    private Long id;
-    private String code;
-    private String libelle;
-    private List<FieldConfigVueDto> fieldConfigurations;
-
-    
-public class FieldConfigVueDto {
-    private Long id;
-    private String code;
-    private String libelle;
-    private String type;
-    private String expression;
-    private List<ValueItemRisqueItemVueDto> risqueValueList;
-    private boolean selected;
-    private String customBloc;
-    private Long risqueValueId;
-    private boolean searchable;
-    private LocalDate dateBloc;
-    private boolean selectBoolean;
-public class ValueItemRisqueItemVueDto {
-    private Long id;
-    private ListValueItemVueDto listValueItem;
-    private RisqueValueItemVueDto risqueValueItem;
-
-
-  public class ListValueItemVueDto {
-    private Long id;
-    private String code;
-    private String libelle;
-      private Long id;
-    private String code;
-    private String libelle;
-    private List<RisqueItemWeightDto> weights;
-
-    
-public class RisqueItemWeightDto {
-        private Long id;
-        private int weightL;
-        private int weightMl;
-        private int weightMh;
-        private Long risqueValueItemDtoId;
-        private Long fieldConfigDtoId;
-        private Long areaId;
-
-// mapper
-
-public SegmentDtoVues toDtoVue(Segment segment) {
-        SegmentDtoVues dto = new SegmentDtoVues();
-        dto.setId(segment.getId());
-        dto.setCode(segment.getCode());
-        dto.setLibelle(segment.getLibelle());
-
-        List<AreasVueDto> areasDtoList = new ArrayList<>();
-        for (Area area : segment.getAreas()) {
-            AreasVueDto areaDto = new AreasVueDto();
-            areaDto.setId(area.getId());
-            areaDto.setCode(area.getCode());
-            areaDto.setLibelle(area.getLibelle());
-
-            List<FieldConfigVueDto> fieldDtos = new ArrayList<>();
-            for (FieldConfiguration config : area.getFieldConfigurations()) {
-                FieldConfigVueDto fieldDto = new FieldConfigVueDto();
-                fieldDto.setId(config.getId());
-                fieldDto.setCode(config.getCode());
-                fieldDto.setLibelle(config.getLibelle());
-                fieldDto.setType(config.getType());
-                fieldDto.setExpression(config.getExpression());
-                fieldDto.setSelected(config.isSelected());
-                if(config.getRisqueValueList().getId()!= null){
-                    fieldDto.setRisqueValueId(config.getRisqueValueList().getId());
-
-                }else{
-                    fieldDto.setRisqueValueId(null);
-
-                }
-                fieldDto.setSearchable(config.isSearchable());
-
-                List<ValueItemRisqueItemVueDto> risqueDtos = new ArrayList<>();
-                if (config.getValueItemRisqueItem() != null) {
-                    for (ValueItemRisqueItem item : config.getValueItemRisqueItem()) {
-                        ValueItemRisqueItemVueDto itemDto = new ValueItemRisqueItemVueDto();
-                        itemDto.setId(item.getId());
-
-                        if (item.getListValueItem() != null) {
-                            ListValueItemVueDto listValueDto = new ListValueItemVueDto();
-                            listValueDto.setId(item.getListValueItem().getId());
-                            listValueDto.setCode(item.getListValueItem().getCode());
-                            listValueDto.setLibelle(item.getListValueItem().getLibelle());
-                            itemDto.setListValueItem(listValueDto);
-                        }
-
-                        if (item.getRisqueValueItem() != null) {
-                            RisqueValueItem risqueEntity = item.getRisqueValueItem();
-
-                            RisqueValueItemVueDto risqueItemDto = new RisqueValueItemVueDto();
-                            risqueItemDto.setId(risqueEntity.getId());
-                            risqueItemDto.setCode(risqueEntity.getCode());
-                            risqueItemDto.setLibelle(risqueEntity.getLibelle());
-
-                            // Poids : liste de RisqueItemWeightDto
-                            List<RisqueItemWeightDto> poidsDtos = new ArrayList<>();
-                            if (risqueEntity.getWeights() != null) {
-                                for (RisqueItemWeight poids : risqueEntity.getWeights()) {
-                                    RisqueItemWeightDto poidsDto = new RisqueItemWeightDto();
-                                    poidsDto.setId(poids.getId());
-                                    poidsDto.setWeightL(poids.getWeightL());
-                                    poidsDto.setWeightMl(poids.getWeightMl());
-                                    poidsDto.setWeightMh(poids.getWeightMh());
-                                    poidsDto.setAreaId(poids.getArea() != null ? poids.getArea().getId() : null);
-                                    poidsDto.setFieldConfigDtoId(poids.getFieldConfiguration() != null ? poids.getFieldConfiguration().getId() : null);
-                                    poidsDto.setRisqueValueItemDtoId(risqueEntity.getId());
-
-                                    poidsDtos.add(poidsDto);
-                                }
-                            }
-                            risqueItemDto.setWeights(poidsDtos);
-                            itemDto.setRisqueValueItem(risqueItemDto);
-                        }
-
-                        risqueDtos.add(itemDto);
-                        fieldDto.setRisqueValueList(risqueDtos);
-
-                    }
-                }
-
-                fieldDtos.add(fieldDto);
-            }
-
-            areaDto.setFieldConfigurations(fieldDtos);
-            areasDtoList.add(areaDto);
-        }
-
-        dto.setAreas(areasDtoList);
-        return dto;
-    }
-/// service
-
-
-
-
-package com.sahambank.fccr.core.service.Impl;
-
-import com.sahambank.fccr.core.dto.searchSegments.SegmentsDto;
-import com.sahambank.fccr.core.dto.segment.SegmentCreateDTO;
-import com.sahambank.fccr.core.dto.segment.SegmentDTO;
-import com.sahambank.fccr.core.dto.segment.SegmentDtoVues;
-import com.sahambank.fccr.core.entities.Area;
-import com.sahambank.fccr.core.entities.Segment;
-import com.sahambank.fccr.core.exception.ResourceNotFoundException;
-import com.sahambank.fccr.core.mapper.SegmentMapper;
-import com.sahambank.fccr.core.repository.AreaRepository;
-import com.sahambank.fccr.core.repository.SegmentRepository;
-import com.sahambank.fccr.core.service.ISegmentService;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-@Service
-public class SegmentServiceImpl implements ISegmentService {
-
-    private final SegmentRepository segmentRepository;
-    private final AreaRepository areaRepository;
-    private final SegmentMapper segmentMapper;
-
-    public SegmentServiceImpl(SegmentRepository segmentRepository, AreaRepository areaRepository, SegmentMapper segmentMapper) {
-        this.segmentRepository = segmentRepository;
-        this.areaRepository = areaRepository;
-        this.segmentMapper = segmentMapper;
-    }
-
-
-    public List<SegmentDTO> findAll() {
-        return segmentRepository.findAll().stream()
-                .map(segmentMapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-    public SegmentDtoVues findById(Long id) {
-        Segment segment = segmentRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Segment introuvable pour id=" + id));
-        return segmentMapper.toDtoVue(segment);
-    }
-
-    public SegmentCreateDTO create(SegmentCreateDTO dto) {
-        Optional<Segment>segment = segmentRepository.findByCode(dto.getCode());
-        if(segment.isPresent()){
-            throw new ResourceNotFoundException("rrr");
-        }
-        return segmentMapper.toCreateDto(segmentRepository.save(segmentMapper.toEntityCreate(dto)));
-    }
-
-    public SegmentCreateDTO update(Long id, SegmentCreateDTO dto) {
-        Segment existing = segmentRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Segment introuvable pour id=" + id));
-        existing.setCode(dto.getCode());
-        existing.setLibelle(dto.getLibelle());
-        Segment updated = segmentRepository.save(existing);
-        return segmentMapper.toCreateDto(updated);
-    }
-
-    public void delete(Long id) {
-        if (!segmentRepository.existsById(id)) {
-            throw new RuntimeException("Impossible de supprimer : Segment introuvable pour id=" + id);
-        }
-        segmentRepository.deleteById(id);
-    }
-
-    private Segment getSegmentArea(SegmentDTO segmentDTO , Segment segment){
-
-        List<Area>areas = new ArrayList<>();
-        segmentDTO.getAreasId().forEach(areaId -> {
-            Optional<Area> area = areaRepository.findById(areaId);
-            if(area.isPresent()){
-                areas.add(area.get());
-            }else {
-                throw  new ResourceNotFoundException("this area does not exist");
-            }
-
-        });
-        segment.setAreas(areas);
-        return segment;
-    }
-    @Override
-    public List<SegmentsDto> searchAll() {
-        return segmentRepository.findAll().stream()
-                .map(segmentMapper::toSearchDto)
-                .collect(Collectors.toList());
-    }
-}
-
-
-
-
-//filed config //
-
-public class FieldConfigVueDto {
-    private Long id;
-    private String code;
-    private String libelle;
-    private String type;
-    private String expression;
-    private List<ValueItemRisqueItemVueDto> risqueValueList;
-    private boolean selected;
-    private String customBloc;
-    private Long risqueValueId;
-    private boolean searchable;
-    private LocalDate dateBloc;
-    private boolean selectBoolean;
-
-public class FieldConfigurationSearchDto {
-
-    private Long id;
-    private String code;
-    private String libelle;
-    private String type;
-    private ListSearchValueDto listValueDTO;
-    private RisqueValueListSearchDTO risqueValueListDTO;
-    private String expression;
-
-//public class FieldConfigVueDto {
-    private Long id;
-    private String code;
-    private String libelle;
-    private String type;
-    private String expression;
-    private List<ValueItemRisqueItemVueDto> risqueValueList;
-    private boolean selected;
-    private String customBloc;
-    private Long risqueValueId;
-    private boolean searchable;
-    private LocalDate dateBloc;
-    private boolean selectBoolean;
-
-
-
-package com.sahambank.fccr.core.mapper;
-
-import com.sahambank.fccr.core.entities.*;
-import com.sahambank.fccr.core.dto.FieldConfig.FieldConfigurationDTO;
-import com.sahambank.fccr.core.dto.FieldConfigurationCreateDTO;
-import com.sahambank.fccr.core.dto.ValueItemRisqueItemDto;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-@Component
-public class FieldConfigurationMapper implements EntityMapper<FieldConfigurationDTO, FieldConfiguration> {
-    @Autowired private ListValueMapper listValueMapper;
-    @Autowired private RisqueValueListMapper risqueValueListMapper;
-
-
-
-    @Override
-    public FieldConfigurationDTO toDto(FieldConfiguration entity) {
-        if (entity == null) return null;
-
-        FieldConfigurationDTO dto = new FieldConfigurationDTO();
-        dto.setId(entity.getId());
-        dto.setCode(entity.getCode());
-        dto.setLibelle(entity.getLibelle());
-        dto.setType(entity.getType());
-        dto.setSelected(entity.isSelected());
-        String type = entity.getType();
-        dto.setFonction(entity.isFonction());
-        dto.setFonctionType(entity.getFonctionType());
-
-        if ("text".equalsIgnoreCase(type)) {
-            dto.setCustomBloc(entity.getCustomBloc());
-        } else if ("date".equalsIgnoreCase(type)) {
-            dto.setDateBloc(entity.getDateBloc());
-        } else if ("boolean".equalsIgnoreCase(type)) {
-            dto.setSelectBoolean(entity.isSelectBoolean());
-        } else if ("select".equalsIgnoreCase(type)) {
-        if (entity.getValueItemRisqueItem() != null && !entity.getValueItemRisqueItem().isEmpty()) {
-            List<ValueItemRisqueItemDto> valueItemRisqueItemDtos = new ArrayList<>();
-            for (ValueItemRisqueItem item : entity.getValueItemRisqueItem()) {
-                ValueItemRisqueItemDto dtoItem = new ValueItemRisqueItemDto();
-                dtoItem.setId(item.getId());
-                dtoItem.setValueItemId(item.getListValueItem().getId());
-                dtoItem.setRisqueValueItemId(item.getRisqueValueItem().getId());
-                valueItemRisqueItemDtos.add(dtoItem);
-            }
-            dto.setValueItemRisqueItemDto(valueItemRisqueItemDtos);
-        }
-
-
-        if (entity.getValueList() != null) {
-            dto.setValueId(entity.getValueList().getId());
-        }
-    }
-        if (entity.getAreas() != null && !entity.getAreas().isEmpty()) {
-            Set<Long> areaIds = entity.getAreas().stream()
-                    .map(Area::getId)
-                    .collect(Collectors.toSet());
-            dto.setAreasId(areaIds);
-        }
-
-        if (entity.getRisqueValueList() != null) {
-            dto.setRisqueValueId(entity.getRisqueValueList().getId());
-        }
-
-        return dto;
-    }
-
-
-
-    @Override
-    public FieldConfiguration toEntity(FieldConfigurationDTO dto) {
-        if (dto == null) return null;
-
-        FieldConfiguration entity = new FieldConfiguration();
-        entity.setId(dto.getId());
-        entity.setCode(dto.getCode());
-        entity.setLibelle(dto.getLibelle());
-        entity.setType(dto.getType());
-        entity.setSelected(dto.isSelected());
-
-
-        if (dto.getValueId() != null) {
-            ListValue valueStub = new ListValue();
-            valueStub.setId(dto.getValueId());
-            entity.setValueList(valueStub);
-        }
-
-        if (dto.getRisqueValueId() != null) {
-            RisqueValueList risqueStub = new RisqueValueList();
-            risqueStub.setId(dto.getRisqueValueId());
-            entity.setRisqueValueList(risqueStub);
-        }
-
-        if (dto.getAreasId() != null && !dto.getAreasId().isEmpty()) {
-            Set<com.sahambank.fccr.core.entities.Area> areaStubs = dto.getAreasId().stream().map(id -> {
-                Area area = new Area();
-                area.setId(id);
-                return area;
-            }).collect(Collectors.toSet());
-            entity.setAreas(areaStubs);
-        }
-        return entity;
-    }
-
-    public FieldConfiguration toEntityCreate(FieldConfigurationCreateDTO dto) {
-        if (dto == null) return null;
-
-        FieldConfiguration entity = new FieldConfiguration();
-        entity.setId(dto.getId());
-        entity.setCode(dto.getCode());
-        entity.setLibelle(dto.getLibelle());
-        entity.setType(dto.getType());
-        entity.setSelected(dto.isSelected());
-        entity.setSearchable(dto.isSearchable());
-        entity.setFonctionType(dto.getFonctionType());
-        entity.setFonction(dto.isFonction());
-
-        if (dto.getValueId() != null) {
-            ListValue valueStub = new ListValue();
-            valueStub.setId(dto.getValueId());
-            entity.setValueList(valueStub);
-        }
-
-        if (dto.getRisqueValueId() != null) {
-            RisqueValueList risqueStub = new RisqueValueList();
-            risqueStub.setId(dto.getRisqueValueId());
-            entity.setRisqueValueList(risqueStub);
-        }
-
-        String type = dto.getType();
-        if ("text".equalsIgnoreCase(type)) {
-            entity.setCustomBloc(dto.getCustomBloc());
-        } else if ("date".equalsIgnoreCase(type)) {
-            entity.setDateBloc(dto.getDateBloc());
-        } else if ("boolean".equalsIgnoreCase(type)) {
-            entity.setSelectBoolean(dto.isSelectBoolean());
-        }
-
-        return entity;
-    }
-
-    /*
-     public FieldConfigurationDTO toDto(FieldConfiguration entity) {
-        if (entity == null) return null;
-
-        FieldConfigurationDTO dto = new FieldConfigurationDTO();
-        dto.setId(entity.getId());
-        dto.setCode(entity.getCode());
-        dto.setLibelle(entity.getLibelle());
-        dto.setType(entity.getType());
-
-        // Conversion des Area en ID
-        if (entity.getAreas() != null && !entity.getAreas().isEmpty()) {
-            Set<Long> areaIds = entity.getAreas().stream()
-                    .map(Area::getId)
-                    .collect(Collectors.toSet());
-            dto.setAreasId(areaIds);
-        }
-
-        if (entity.getValueList() != null) {
-            dto.setValueId(entity.getValueList().getId());
-        }
-
-        if (entity.getRisqueValueList() != null) {
-            dto.setRisqueValueId(entity.getRisqueValueList().getId());
-        }
-
-        return dto;
-    }
-
-    @Override
-    public FieldConfiguration toEntity(FieldConfigurationDTO dto) {
-        if (dto == null) return null;
-
-        FieldConfiguration entity = new FieldConfiguration();
-        entity.setId(dto.getId());
-        entity.setCode(dto.getCode());
-        entity.setLibelle(dto.getLibelle());
-        entity.setType(dto.getType());
-
-        if (dto.getValueId() != null) {
-            ListValue valueStub = new ListValue();
-            valueStub.setId(dto.getValueId());
-            entity.setValueList(valueStub);
-        }
-
-        if (dto.getRisqueValueId() != null) {
-            RisqueValueList risqueStub = new RisqueValueList();
-            risqueStub.setId(dto.getRisqueValueId());
-            entity.setRisqueValueList(risqueStub);
-        }
-
-        // Conversion des areasId en objets Area (stub)
-        if (dto.getAreasId() != null && !dto.getAreasId().isEmpty()) {
-            Set<Area> areaStubs = dto.getAreasId().stream().map(id -> {
-                Area area = new Area();
-                area.setId(id);
-                return area;
-            }).collect(Collectors.toSet());
-            entity.setAreas(areaStubs);
-        }
-
-        return entity;
-    }
-    */
-}
-
-package com.sahambank.fccr.core.service.Impl;
-
-import com.sahambank.fccr.core.entities.*;
-import com.sahambank.fccr.core.mapper.AreaMapper;
-import com.sahambank.fccr.core.mapper.FieldConfigurationMapper;
-import com.sahambank.fccr.core.mapper.ListValueMapper;
-import com.sahambank.fccr.core.mapper.RisqueValueListMapper;
-import com.sahambank.fccr.core.dto.FieldConfig.FieldConfigurationDTO;
-import com.sahambank.fccr.core.repository.AreaRepository;
-import com.sahambank.fccr.core.repository.FieldConfigurationRepository;
-import com.sahambank.fccr.core.repository.ListValueRepository;
-import com.sahambank.fccr.core.repository.RisqueValueListRepository;
-import com.sahambank.fccr.core.dto.FieldConfigurationCreateDTO;
-import com.sahambank.fccr.core.repository.*;
-import com.sahambank.fccr.core.service.IFieldConfigurationService;
-import io.fabric8.kubernetes.client.ResourceNotFoundException;
-import jakarta.transaction.Transactional;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-@Service
-public class FieldConfigurationServiceImpl implements IFieldConfigurationService {
-
-    private final FieldConfigurationRepository repository;
-    private final FieldConfigurationMapper mapper;
-    private final ListValueMapper listValueMapper;
-    private final ListValueRepository listValueRepository;
-    private final ValueItemRisqueItemRepository valueItemRisqueItemRepository;
-    private final ListValueItemRepository listValueItemRepository;
-    private final RisqueValueItemRepository risqueValueItemRepository;
-    private final RisqueValueListRepository risqueValueListRepository;
-    private final RisqueValueListMapper risqueValueListMapper;
-    private final AreaMapper areaMapper;
-    private final AreaRepository areaRepository;
-
-    public FieldConfigurationServiceImpl(FieldConfigurationRepository repository, FieldConfigurationMapper mapper,
-                                         ListValueMapper listValueMapper, ListValueRepository listValueRepository, ValueItemRisqueItemRepository valueItemRisqueItemRepository, ListValueItemRepository listValueItemRepository, RisqueValueItemRepository risqueValueItemRepository, RisqueValueListRepository risqueValueListRepository, RisqueValueListMapper risqueValueListMapper, AreaMapper areaMapper, AreaRepository areaRepository) {
-        this.repository = repository;
-        this.mapper = mapper;
-        this.listValueMapper = listValueMapper;
-        this.listValueRepository = listValueRepository;
-        this.valueItemRisqueItemRepository = valueItemRisqueItemRepository;
-        this.listValueItemRepository = listValueItemRepository;
-        this.risqueValueItemRepository = risqueValueItemRepository;
-        this.risqueValueListRepository = risqueValueListRepository;
-        this.risqueValueListMapper = risqueValueListMapper;
-        this.areaMapper = areaMapper;
-        this.areaRepository = areaRepository;
-    }
-
-    public List<FieldConfigurationDTO> findAll() {
-        return repository.findAll().stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-
-    public FieldConfigurationDTO findById(Long id) {
-        FieldConfiguration entity = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("FieldConfiguration introuvable pour id=" + id));
-        return mapper.toDto(entity);
-    }
-    @Transactional
-    public FieldConfigurationDTO create(FieldConfigurationCreateDTO dto) {
-        FieldConfiguration field = mapper.toEntityCreate(dto);
-        FieldConfiguration saved = repository.save(getField(dto, field));
-        return mapper.toDto(saved);
-    }
-
-
-    private List<ValueItemRisqueItem> typeFields(FieldConfigurationCreateDTO dto,FieldConfiguration fieldConfiguration){
-        List<ValueItemRisqueItem> valueItemRisqueItems = new ArrayList<>();
-        dto.getRisqueItemsValues().forEach(typeField -> {
-            Optional<ListValueItem> listValueItem = listValueItemRepository.findById(typeField.getValueItemId());
-            Optional<RisqueValueItem> risqueValueList = risqueValueItemRepository.findById(typeField.getRiskId());
-            ValueItemRisqueItem valueItemRisqueItem = new ValueItemRisqueItem();
-            valueItemRisqueItem.setListValueItem(listValueItem.get());
-            valueItemRisqueItem.setRisqueValueItem(risqueValueList.get());
-            valueItemRisqueItem.setFieldConfiguration(fieldConfiguration);
-            valueItemRisqueItems.add(valueItemRisqueItem);
-
-        });
-        return valueItemRisqueItems;
-    }
-
-    private FieldConfiguration getField(FieldConfigurationCreateDTO dto, FieldConfiguration fieldConfiguration) {
-       if(dto.getValueId() != null){
-        Optional<ListValue> values = listValueRepository.findById(dto.getValueId());
-        if (values.isPresent()) {
-            fieldConfiguration.setValueList(values.get());
-        } else {
-            throw new ResourceNotFoundException("value does not exist");
-        }
-
-        Optional<RisqueValueList> risque = risqueValueListRepository.findById(dto.getRisqueValueId());
-        if (risque.isPresent()) {
-            fieldConfiguration.setRisqueValueList(risque.get());
-        } else {
-            throw new ResourceNotFoundException("risque does not exist");
-        }
-
-        fieldConfiguration.setValueItemRisqueItem( typeFields(dto,fieldConfiguration));
-       }else {
-           fieldConfiguration.setCustomBloc(dto.getCustomBloc());
-
-       }
-        return fieldConfiguration;
-    }
-
-    public FieldConfigurationDTO update(Long id, FieldConfigurationCreateDTO dto) {
-        FieldConfiguration existing = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("FieldConfiguration introuvable pour id=" + id));
-
-        existing.setCode(dto.getCode());
-        existing.setLibelle(dto.getLibelle());
-        existing.setType(dto.getType());
-        getField(dto, existing);
-
-        FieldConfiguration updated = repository.save(existing);
-        return mapper.toDto(updated);
-    }
-
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("Suppression impossible : FieldConfiguration introuvable pour id=" + id);
-        }
-        repository.deleteById(id);
-    }
-    @Override
-    public List<FieldConfigurationDTO> searchAll(List<Long> areaIds) {
-        if (areaIds == null || areaIds.isEmpty()) {
-            throw new IllegalArgumentException("Liste des areas vide.");
-        }
-
-        List<FieldConfiguration> configs = repository.findByAreaIds(areaIds);
-        return configs.stream()
-                .map(mapper::toDto)
-                .collect(Collectors.toList());
-    }
-
-}
-
-// front notation .////
-
-
-<nb-card accent="danger">
-  <nb-card-header class="d-flex flex-row justify-content-between align-items-center">
-    <h5 class="title-heading text-uppercase my-auto p-2">
-      Notation
-    </h5>
-
-  </nb-card-header>
-  <form [formGroup]="fieldForm" (ngSubmit)="submit()">
-
-
-      <nb-card-body>
-        <nb-form-field fullWidth>
-          <nb-select
-            fullWidth
-            formControlName="segment"
-            placeholder="Sélectionner un segment"
-            [class.invalid]="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched"
-            (selectedChange)="onSegementChange($event)">
-            <nb-option *ngFor="let type of referentiels$" [value]="type.id">
-              {{ type.libelle }}
-            </nb-option>
-          </nb-select>
-        </nb-form-field>
-        <small class="error" *ngIf="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched">
-          Ce champ est requis.
-        </small>
-      </nb-card-body>
-
-    <ng-container *ngFor="let area of segement.areas">
-      <nb-card class="area-card">
-        <nb-card-header accent="danger"  class="areatit">
-                <nb-icon icon="map-outline" pack="eva"></nb-icon>
-          <strong>{{ area.libelle }}</strong>
-        </nb-card-header>
-        <nb-card-body>
-          <div *ngFor="let config of area.fieldConfigurations" class="field-row">
-            <div class="field-label">
-              <strong>{{ config.libelle }}</strong>
-            </div>
-            <ng-container [ngSwitch]="config.type">
-
-              <!-- TEXT -->
-              <nb-form-field fullWidth *ngSwitchCase="'text'">
-                <input fullWidth nbInput [formControlName]="'value' " placeholder="Saisir texte" />
-              </nb-form-field>
-
-              <nb-form-field fullWidth *ngSwitchCase="'date'">
-                <input nbInput fullWidth placeholder="Sélectionner une date" formControlName="value"
-                  [nbDatepicker]="picker" />
-
-                <nb-datepicker #picker></nb-datepicker>
-              </nb-form-field>
-
-
-              <!-- SELECT -->
-              <nb-form-field fullWidth *ngSwitchCase="'select'">
-                <nb-select  fullWidth [formControlName]="'value'" placeholder="Sélectionner…" multiple>
-                  <nb-option fullWidth *ngFor="let opt of config.risqueValueList" [value]="opt.risqueValueItem.id">
-                    {{ opt.listValueItem.libelle }}
-                  </nb-option>
-                </nb-select>
-              </nb-form-field>
-
-              <!-- BOOLEAN -->
-              <nb-form-field fullWidth *ngSwitchCase="'boolean'">
-                <nb-select fullWidth [formControlName]="'value'">
-                  <nb-option fullWidth [value]="true">Oui</nb-option>
-                  <nb-option fullWidth [value]="false">Non</nb-option>
-                </nb-select>
-              </nb-form-field>
-
-            </ng-container>
-
-          </div>
-        </nb-card-body>
-      </nb-card>
-    </ng-container>
-
-
-    <nb-card class="actions-cards">
-      <nb-card-body class="actions">
-        <button nbButton status="primary" type="submit">
-          <nb-icon icon="checkmark-outline"></nb-icon>
-          Valider
-        </button>
-
-      </nb-card-body>
-    </nb-card>
-
-
-
-  </form>
-</nb-card>
-
-
-
-import { Component, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output } from '@angular/core';
+import { FieldConfigurationDTO, ListValueDTO, ListValueItemDTO, RisqueValueItemDTO } from '../../model/fieldConfig';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Observable } from 'rxjs';
 import { NbToastrService } from '@nebular/theme';
-import { GestionReferentielsService } from '../../gestion-referentiel/services/gestion-referentiels.service';
-import { Referentiel } from 'src/app/core/models/Referentiel';
-import { ReferentielTypes } from '../../traitement-demande/model/fieldConfig';
-import { NotationService } from '../notation.service';
-import { SegmentDtoVues } from '../model/segementDtoVue';
-import {  NbGlobalPhysicalPosition } from '@nebular/theme';
+import { TraitementsService } from 'src/app/features/service/traitement.service';
+import { AreaServiceService } from '../../services/area-service.service';
 
 @Component({
-  standalone: false,
-  selector: 'app-add-notation',
-  templateUrl: './add-notation.component.html',
-  styleUrl: './add-notation.component.scss'
+  selector: 'app-saisie-demande',
+  templateUrl: './saisie-demande.component.html',
+  styleUrl: './saisie-demande.component.scss',
+  standalone: false
 })
-export class AddNotationComponent implements OnInit {
+export class SaisieDemandeComponent implements OnInit {
+  constructor(private demandeService:TraitementsService,private fb: FormBuilder,private toasterService:NbToastrService,private areaService:AreaServiceService) {
+   this.searchFormGroup = this.fb.group({
+      code: [''],
+      libelle: [''],
+      type: [''],
+      contrainte: [''],
+    });
+
+     this.fieldForm = this.fb.group({
+        code: [''],
+        libelle: [''],
+        type: [''],
+        valueId: [null],
+        customBloc: [null],
+        risqueValueId: [null],
+        risqueItemsValues: [null],
+        selected: [true],
+        fonction: [false],      
+        fonctionType: [null],
+        searchable:[true],
+        dateBloc:[null],
+        selectBoolean:[null],
+        contrainte:[null]
+  });
+  }
+
+  fonctionTypes = [
+  { code: 'Cash', libelle: 'Calcule de Cash ' },
+  { code: 'Produit', libelle: 'Calcule de Produit ' },
+  { code: 'Contract', libelle: 'Calcule Contract ' },
+  { code: 'Paye', libelle: 'Calcule de Paye a Risque Elevée' }
+];
+
+selectedType: string = '';
+listeDeBlocsSelectionnee = false;
+selectedRisks: { valueItemId: number; riskId: number }[] = [];
+contrainte=false;
+ fields: FieldConfigurationDTO[] = [];
+  filtredItems: FieldConfigurationDTO[] = [];
+  columns: any[] = [];
+  dashboard = false;
+  sortValue = '';
+  sortDirection = true;
+  searchFormGroup: FormGroup;
+  canEdit = true;
+  canAdd = true;
+  formGroup!: FormGroup;
+  fieldConfig!: any;
   fieldForm!: FormGroup;
-    selectedRef: string = "segments";
-     referentiels$ !: Referentiel[];
-       referentielTypes: ReferentielTypes[] = [];
-     segement: SegmentDtoVues = {} as SegmentDtoVues;
+  listeValue:any[]=[];
+  listeArea:any[]=[];
+  types:any[]=[
+    {code:"select",libelle:"List"},
+    {code:"text",libelle:"text"},
+    {code:"number",libelle:"Numéro"},
+    {code:"date",libelle:"date"},
+    {code:"boolean",libelle:"Oui/Non"}
+  ];
 
-  constructor(private fb: FormBuilder,private toasterService:NbToastrService,private serviceRef: GestionReferentielsService,private notationService:NotationService) {
+  listValueItems: ListValueItemDTO[] = [];
+  riskValueItems: RisqueValueItemDTO[] = [];
+  listRisque :any[] = [];
 
-      this.referentielTypes  = [
-      {value:'segments', label:'Segment', hasExpression:false},
-      {value:'areas', label:'Area', hasExpression:false},
-      {value:'listValues', label:'List Value ', hasExpression:true},
-      {value:'listValueItems', label:'List Value Item', hasExpression:false},
-      {value:'risqueValueLists', label:'Risque Value', hasExpression:false},
-      {value:'risqueValueItems', label:'Risque Value Item', hasExpression:false},
+  selectedRisksMap: Record<number, RisqueValueItemDTO> = {};
+  donnees: { value: string; niveauRisque: string }[] = [];
+
+  ngOnInit(): void {
+    this.listValue();
+    this.getRisques();
+      this.columns = [
+      { key: 'code', label: 'Code', hidden: false },
+      { key: 'libelle', label: 'Libellé', hidden: false },
+      { key: 'type', label: 'Type', hidden: false },
+      { key: 'contrainte', label: 'Contrainte', hidden: false },
+      // Ajoute d'autres colonnes selon tes besoins
     ];
 
-this.fieldForm = this.fb.group({
-  segment: ['', Validators.required],
-  libelle: ['', Validators.required],
+    this.loadFields();
+    //this.listAreas();
+this.fieldForm.get('fonction')!.valueChanges.subscribe(isFonction => {
+  const ctrl = this.fieldForm.get('fonctionType')!;
+  if (isFonction) {
+    ctrl.setValidators([Validators.required]);
+  } else {
+    ctrl.clearValidators();
+    ctrl.setValue(null);
+  }
+  ctrl.updateValueAndValidity();
 });
 
+this.fieldForm.get('type')?.valueChanges.subscribe((type) => {
+  const form = this.fieldForm;
+  const valueId = form.get('valueId');
+  const risqueValueId = form.get('risqueValueId');
+  const risqueItemsValues = form.get('risqueItemsValues');
+  const customBloc = form.get('customBloc');
+  const dateBloc = form.get('dateBloc');
+  const selectBoolean = form.get('selectBoolean');
+  const fonction = form.get('fonction');
+  const fonctionType = form.get('fonctionType');
+
+  // Reset validators by type
+  switch(type) {
+    case 'text':
+      valueId?.clearValidators();
+      risqueValueId?.clearValidators();
+      risqueItemsValues?.clearValidators();
+      customBloc?.setValidators([Validators.required]);
+      dateBloc?.clearValidators();
+      selectBoolean?.clearValidators();
+      break;
+    case 'select':
+      valueId?.setValidators([Validators.required]);
+      risqueValueId?.setValidators([Validators.required]);
+      risqueItemsValues?.setValidators([Validators.required]);
+      customBloc?.clearValidators();
+      dateBloc?.clearValidators();
+      selectBoolean?.clearValidators();
+      break;
+    case 'date':
+      valueId?.clearValidators();
+      risqueValueId?.clearValidators();
+      risqueItemsValues?.clearValidators();
+      customBloc?.clearValidators();
+      dateBloc?.setValidators([Validators.required]);
+      selectBoolean?.clearValidators();
+      break;
+    case 'boolean':
+      valueId?.clearValidators();
+      risqueValueId?.clearValidators();
+      risqueItemsValues?.clearValidators();
+      customBloc?.clearValidators();
+      dateBloc?.clearValidators();
+      selectBoolean?.setValidators([Validators.required]);
+      break;
+    default:
+      valueId?.clearValidators();
+      risqueValueId?.clearValidators();
+      risqueItemsValues?.clearValidators();
+      customBloc?.clearValidators();
+      dateBloc?.clearValidators();
+      selectBoolean?.clearValidators();
+  }
+
+  if (fonction?.value === true) {
+    fonctionType?.setValidators([Validators.required]);
+  } else {
+    fonctionType?.clearValidators();
+    fonctionType?.setValue(null);
+  }
+
+  Object.values(form.controls).forEach(ctrl => ctrl.updateValueAndValidity());
+});
+
+
+  }
+onContrainteChange(event: boolean): void {
+  this.contrainte = event;
+}
+
+ loadFields() {
+    this.areaService.getFields().subscribe((data) => {
+      this.fields = data;
+      this.filtredItems = [...data];
+    });
+  }
+
+  getColumnValue(item: any, key: string): any {
+    return item[key];
+  }
+
+  onSearch(_: any) {
+    const filter = this.searchFormGroup.value;
+    this.filtredItems = this.fields.filter((item:any) => {
+      return Object.keys(filter).every((key) => {
+        const val = filter[key];
+        return !val || ('' + item[key]).toLowerCase().includes(val.toLowerCase());
+      });
+    });
+  }
+
+  sortBy(key: string) {
+    this.sortDirection = this.sortValue === key ? !this.sortDirection : true;
+    this.sortValue = key;
+    this.filtredItems.sort((a:any, b:any) => {
+      return this.sortDirection
+        ? ('' + a[key]).localeCompare('' + b[key])
+        : ('' + b[key]).localeCompare('' + a[key]);
+    });
+  }
+
+
+  onCheckboxChange(event: Event): void {
+  const inputElement = event.target as HTMLInputElement;
+  this.fieldForm.get('selected')?.setValue(inputElement.checked);
+}
+
+
+  onTypeChange(type: string): void {
+    console.log(type);
+
+  this.selectedType = type;
+  this.fieldForm.value.customBloc=""
+}
+
+ onListAreaSelected(event: any) {
+  }
+
+
+  onListValueSelected(event: ListValueDTO) {
+      this.listeDeBlocsSelectionnee = !!event;
+     const selectedId = event?.id || null;
+  this.fieldForm.patchValue({ valueId: selectedId });
+this.demandeService.getValueItemSearch(event).subscribe({
+      next: (response:any) => {
+        this.listValueItems= response;
+        console.log('Champ ajoute avec succès :', response);
+
+      },
+      error: (err:any) => {
+        console.error('Erreur lors de la création du champ :', err);
+      }
+    });
+
+    this.donnees = [];
+    this.selectedRisksMap = {};
+  }
+
+   listValue(): void {
+      this.demandeService.getAllValues().subscribe({
+      next: (response:any) => {
+        this.listeValue= response;
+        console.log('Champ risque avec succès :', response);
+
+      },
+      error: (err:any) => {
+        console.error('Erreur lors de la création du champ :', err);
+      }
+    });
+
+  }
+
+    listAreas(): void {
+      this.demandeService.getAllAreas().subscribe({
+      next: (response:any) => {
+        this.listeArea= response;
+        console.log('Champ area avec succès :', response);
+
+      },
+      error: (err:any) => {
+        console.error('Erreur lors de la création du champ :', err);
+      }
+    });
+
+  }
+
+     getRisques(): void {
+      this.demandeService.getAllRisque().subscribe({
+      next: (response:any) => {
+        this.listRisque= response;
+        console.log('Champ ajoute avec succès :', response);
+
+      },
+      error: (err:any) => {
+        console.error('Erreur lors de la création du champ :', err);
+      }
+    });
+
+  }
+
+  @Output() deleteItem = new EventEmitter<any>();
+  onAddNewObject() {
+  }
+
+  navigateTo(item: any) {
+  }
+onSubmit(): void {
+  console.log(this.fieldForm);
+
+   if (this.fieldForm.invalid) {
+    Object.values(this.fieldForm.controls).forEach(control => {
+      control.markAsTouched();
+    });
+    return;
   }
 
 
 
+  if (this.fieldForm.valid) {
+    const dto = this.fieldForm.value;
+    console.log(dto);
+
+    dto.risqueItemsValues = this.selectedRisks;
+    this.demandeService.createConfig(dto).subscribe({
+      next: (response:any) => {
+
+        console.log('Configuration créée :', response);
+        this.toasterService.success("Le champ est ceée avec succées")
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+
+      },
+      error: (err:any) => {
+        this.toasterService.danger("Le code déja exist ")
+        console.error('Erreur :', err);
+      }
+    });
+  }else {
+    this.toasterService.warning("Il faut remplir tous les champs")
+  }
+}
 
 
-    ngOnInit(): void {
-           this.serviceRef.getReferentiel(this.selectedRef).subscribe(data => {
-        this.referentiels$ = data
-      })
+ onRiskItemSelected(valueItem: any, selectedRisk: any): void {
+    const existing = this.selectedRisks.findIndex(r => r.valueItemId === valueItem.id);
+    const entry = { valueItemId: valueItem.id, riskId: selectedRisk.id };
 
-
+    if (existing !== -1) {
+      this.selectedRisks[existing] = entry;
+    } else {
+      this.selectedRisks.push(entry);
     }
 
-      onSegementChange(event: any) {
-         const selectedId = event?.id || null;
-      this.fieldForm.patchValue({ valueId: selectedId });
-    this.notationService.getSegmentById(event).subscribe({
-          next: (response) => {
-            this.segement= response;
-            console.log('Champ ajoute avec succès :', response);
-            console.log(this.segement);
+    console.log('Sélections actuelles :', this.selectedRisks);
+  }
 
+  onRiskItemValue(selectedRisk: any):void{
+    console.log(selectedRisk);
 
-          },
-          error: (err:any) => {
-            console.error('Erreur lors de la création du champ :', err);
-          }
-        });
-      }
-
-  submit(): void {
- 
-
-}
-this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
-  status: 'success',
-  duration: 3000,
-  destroyByClick: true,
-  position: NbGlobalPhysicalPosition.TOP_RIGHT,
-  preventDuplicates: true
-});
-
- this.fieldForm.reset();
 
 
   }
 
+
+  onRiskListSelected(event: any): void {
+    console.log(event);
+          this.listeDeBlocsSelectionnee = !!event;
+
+         const selectedId = event?.id || null;
+  this.fieldForm.patchValue({ risqueValueId: selectedId });
+
+  this.demandeService.getAllRisqueSearch(event).subscribe({
+      next: (response:any) => {
+        this.riskValueItems= response;
+        console.log('Champ rrrr avec succès :', response);
+
+      },
+      error: (err:any) => {
+        console.error('Erreur lors de la création du champ :', err);
+      }
+    });
+  }
+
+  //  onRiskItemSelected(valueItem: ListValueItemDTO, riskItem: RisqueValueItemDTO): void {
+  //   this.selectedRisksMap[valueItem.id] = riskItem;
+
+  //   const existingIndex = this.donnees.findIndex(d => d.value === valueItem.libelle);
+  //   if (existingIndex !== -1) {
+  //     this.donnees[existingIndex].niveauRisque = riskItem.libelle;
+  //   } else {
+  //     this.donnees.push({
+  //       value: valueItem.libelle,
+  //       niveauRisque: riskItem.libelle
+  //     });
+  //   }
+  // }
 }
-
-// champs ////
-
 
 
 <nb-card accent="danger">
@@ -947,8 +471,8 @@ this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
             <nb-icon icon="checkmark-square-outline"></nb-icon>
           </h6>
           <nb-checkbox formControlName="fonction">
-            Fonction
-          </nb-checkbox>
+    Activer la fonction
+            </nb-checkbox>
 
 
           <h6 class="field-label-search">
@@ -1176,1250 +700,827 @@ this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
 </table>
 
 
+/////////////////////////////////////////////notation
+<nb-card accent="danger">
+  <nb-card-header class="d-flex flex-row justify-content-between align-items-center">
+    <h5 class="title-heading text-uppercase my-auto p-2">Notation</h5>
+  </nb-card-header>
+
+  <form [formGroup]="fieldForm" (ngSubmit)="submit()">
+    <nb-card-body>
+      <nb-form-field fullWidth>
+        <nb-select
+          fullWidth
+          formControlName="segment"
+          placeholder="Sélectionner un segment"
+          [class.invalid]="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched"
+          (selectedChange)="onSegmentChange($event)">
+          <nb-option *ngFor="let type of referentiels$" [value]="type.id">
+            {{ type.libelle }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+      <small class="error" *ngIf="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched">
+        Ce champ est requis.
+      </small>
+    </nb-card-body>
+
+    <ng-container *ngIf="segement?.areas?.length">
+      <div formGroupName="fields">
+        <ng-container *ngFor="let area of segement.areas">
+          <nb-card class="area-card">
+            <nb-card-header accent="danger" class="areatit">
+              <nb-icon icon="map-outline" pack="eva"></nb-icon>
+              <strong>{{ area.libelle }}</strong>
+            </nb-card-header>
+
+            <nb-card-body>
+              <div *ngFor="let config of area.fieldConfigurations" class="field-row">
+                <div class="field-label">
+                  <strong>{{ config.libelle }}</strong>
+                </div>
+
+                <ng-container [ngSwitch]="config.type">
+                  <!-- TEXT -->
+                  <nb-form-field fullWidth *ngSwitchCase="'text'">
+                    <input nbInput fullWidth [formControlName]="config.id.toString()" placeholder="Saisir texte" />
+                  </nb-form-field>
+
+                  <!-- DATE -->
+                  <nb-form-field fullWidth *ngSwitchCase="'date'">
+                    <input nbInput fullWidth [formControlName]="config.id.toString()" placeholder="Sélectionner une date"  datePickers />
+                  </nb-form-field>
+
+                  <!-- SELECT -->
+                  <nb-form-field fullWidth *ngSwitchCase="'select'">
+                    <nb-select fullWidth [formControlName]="config.id.toString()" placeholder="Sélectionner…" multiple>
+                      <nb-option *ngFor="let opt of config.risqueValueList" [value]="opt.risqueValueItem.id">
+                        {{ opt.listValueItem.libelle }}
+                      </nb-option>
+                    </nb-select>
+                  </nb-form-field>
+
+                  <!-- BOOLEAN -->
+                  <nb-form-field fullWidth *ngSwitchCase="'boolean'">
+                    <nb-select fullWidth [formControlName]="config.id.toString()">
+                      <nb-option [value]="true">Oui</nb-option>
+                      <nb-option [value]="false">Non</nb-option>
+                    </nb-select>
+                  </nb-form-field>
+                </ng-container>
+
+                <!-- Erreur de validation -->
+                <small class="error" *ngIf="fieldForm.get('fields')?.get(config.id.toString())?.invalid &&
+                                             fieldForm.get('fields')?.get(config.id.toString())?.touched">
+                  Ce champ est requis.
+                </small>
+              </div>
+            </nb-card-body>
+          </nb-card>
+        </ng-container>
+      </div>
+    </ng-container>
+
+    <nb-card class="actions-cards">
+      <nb-card-body class="actions">
+        <button nbButton status="primary" type="submit">
+          <nb-icon icon="checkmark-outline"></nb-icon>
+          Valider
+        </button>
+      </nb-card-body>
+    </nb-card>
+  </form>
+</nb-card>
 
 
-
-import { Component, EventEmitter, OnInit, Output } from '@angular/core';
-import { FieldConfigurationDTO, ListValueDTO, ListValueItemDTO, RisqueValueItemDTO } from '../../model/fieldConfig';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { NbToastrService } from '@nebular/theme';
-import { TraitementsService } from 'src/app/features/service/traitement.service';
-import { AreaServiceService } from '../../services/area-service.service';
-
+import { GestionReferentielsService } from '../../gestion-referentiel/services/gestion-referentiels.service';
+import { Referentiel } from 'src/app/core/models/Referentiel';
+import { ReferentielTypes } from '../../traitement-demande/model/fieldConfig';
+import { NotationService } from '../notation.service';
+import { SegmentDtoVues } from '../model/segementDtoVue';
+import {  NbGlobalPhysicalPosition } from '@nebular/theme';
+import { formatDate } from '@angular/common';
+import { NbDatepickerModule, NbInputModule } from '@nebular/theme';
+import { NbEvaIconsModule } from '@nebular/eva-icons';
 @Component({
-  selector: 'app-saisie-demande',
-  templateUrl: './saisie-demande.component.html',
-  styleUrl: './saisie-demande.component.scss',
-  standalone: false
+  standalone: false,
+  selector: 'app-add-notation',
+  templateUrl: './add-notation.component.html',
+  styleUrl: './add-notation.component.scss'
 })
-export class SaisieDemandeComponent implements OnInit {
-  constructor(private demandeService:TraitementsService,private fb: FormBuilder,private toasterService:NbToastrService,private areaService:AreaServiceService) {
-   this.searchFormGroup = this.fb.group({
-      code: [''],
-      libelle: [''],
-      type: [''],
-      contrainte: [''],
-    });
-
-     this.fieldForm = this.fb.group({
-        code: [''],
-        libelle: [''],
-        type: [''],
-        valueId: [null],
-        customBloc: [null],
-        risqueValueId: [null],
-        risqueItemsValues: [null],
-        selected: [true],
-        fonction: [false],
-        fonctionType: [null],
-        searchable:[true],
-        dateBloc:[null],
-        selectBoolean:[null],
-        contrainte:[null]
-  });
-  }
-
-  fonctionTypes = [
-  { code: 'Cash', libelle: 'Calcule de Cash ' },
-  { code: 'Produit', libelle: 'Calcule de Produit ' },
-  { code: 'Contract', libelle: 'Calcule Contract ' },
-  { code: 'Paye', libelle: 'Calcule de Paye a Risque Elevée' }
-];
-
-  selectedType: string = '';
-listeDeBlocsSelectionnee = false;
-selectedRisks: { valueItemId: number; riskId: number }[] = [];
-contrainte=false;
- fields: FieldConfigurationDTO[] = [];
-  filtredItems: FieldConfigurationDTO[] = [];
-  columns: any[] = [];
-  dashboard = false;
-  sortValue = '';
-  sortDirection = true;
-  searchFormGroup: FormGroup;
-  canEdit = true;
-  canAdd = true;
-  formGroup!: FormGroup;
-  fieldConfig!: any;
+export class AddNotationComponent implements OnInit {
   fieldForm!: FormGroup;
-  listeValue:any[]=[];
-  listeArea:any[]=[];
-  types:any[]=[
-    {code:"select",libelle:"List"},
-    {code:"text",libelle:"text"},
-    {code:"number",libelle:"Numéro"},
-    {code:"date",libelle:"date"},
-    {code:"boolean",libelle:"Oui/Non"}
-  ];
+    selectedRef: string = "segments";
+    referentiels$ !: Referentiel[];
+    referentielTypes: ReferentielTypes[] = [];
+    segement: SegmentDtoVues = {} as SegmentDtoVues;
+datePickers: { [key: number]: any } = {};
 
-  listValueItems: ListValueItemDTO[] = [];
-  riskValueItems: RisqueValueItemDTO[] = [];
-  listRisque :any[] = [];
+  constructor(private fb: FormBuilder,private toasterService:NbToastrService,private serviceRef: GestionReferentielsService,private notationService:NotationService) {
 
-  selectedRisksMap: Record<number, RisqueValueItemDTO> = {};
-  donnees: { value: string; niveauRisque: string }[] = [];
-
-  ngOnInit(): void {
-    this.listValue();
-    this.getRisques();
-      this.columns = [
-      { key: 'code', label: 'Code', hidden: false },
-      { key: 'libelle', label: 'Libellé', hidden: false },
-      { key: 'type', label: 'Type', hidden: false },
-      { key: 'contrainte', label: 'Contrainte', hidden: false },
-      // Ajoute d'autres colonnes selon tes besoins
+      this.referentielTypes  = [
+      {value:'segments', label:'Segment', hasExpression:false},
+      {value:'areas', label:'Area', hasExpression:false},
+      {value:'listValues', label:'List Value ', hasExpression:true},
+      {value:'listValueItems', label:'List Value Item', hasExpression:false},
+      {value:'risqueValueLists', label:'Risque Value', hasExpression:false},
+      {value:'risqueValueItems', label:'Risque Value Item', hasExpression:false},
     ];
 
-    this.loadFields();
-    //this.listAreas();
-this.fieldForm.get('fonction')!.valueChanges.subscribe(isFonction => {
-  const ctrl = this.fieldForm.get('fonctionType')!;
-  if (isFonction) {
-    ctrl.setValidators([Validators.required]);
-  } else {
-    ctrl.clearValidators();
-    ctrl.setValue(null);
-  }
-  ctrl.updateValueAndValidity();
+this.fieldForm = this.fb.group({
+  segment: ['', Validators.required],
+  fields: this.fb.group({}) 
 });
 
-    this.fieldForm.get('type')?.valueChanges.subscribe((type) => {
-    if (type === 'text') {
-      this.fieldForm.get('valueId')?.clearValidators();
-      this.fieldForm.get('risqueValueId')?.clearValidators();
-      this.fieldForm.get('risqueItemsValues')?.clearValidators();
-      //this.fieldForm.get('customBloc')?.setValidators(Validators.required);
-    } else if(type ==="select") {
-      this.fieldForm.get('valueId')?.setValidators(Validators.required);
-      this.fieldForm.get('risqueValueId')?.setValidators(Validators.required);
-      this.fieldForm.get('risqueItemsValues')?.setValidators(Validators.required);
-      this.fieldForm.get('customBloc')?.clearValidators();
-    }else if(type ==="date") {
-      this.fieldForm.get('valueId')?.clearValidators();
-      this.fieldForm.get('risqueValueId')?.clearValidators();
-      this.fieldForm.get('risqueItemsValues')?.clearValidators();
-      this.fieldForm.get('customBloc')?.clearValidators();
-      //this.fieldForm.get('dateBloc')?.setValidators(Validators.required);
+  }
+    ngOnInit(): void {
+      this.serviceRef.getReferentiel(this.selectedRef).subscribe(data => {
+        this.referentiels$ = data
+      })
+
 
     }
-    else  {
-      this.fieldForm.get('valueId')?.clearValidators();
-      this.fieldForm.get('risqueValueId')?.clearValidators();
-      this.fieldForm.get('risqueItemsValues')?.clearValidators();
-      this.fieldForm.get('customBloc')?.clearValidators();
-      this.fieldForm.get('dateBloc')?.clearValidators();
-      //this.fieldForm.get('selectBoolean')?.setValidators(Validators.required);
 
+onSegmentChange(segmentId: number) {
+  this.fieldForm.patchValue({ segment: segmentId });
+
+  this.notationService.getSegmentById(segmentId).subscribe({
+    next: (response) => {
+      const newSegment = response;
+      console.log('Nouveau segment reçu :', newSegment);
+
+      this.segement = newSegment;
+
+      // Vérifie que le sous-groupe 'fields' existe, sinon crée-le
+      let fieldsGroup = this.fieldForm.get('fields') as FormGroup;
+      if (!fieldsGroup) {
+        fieldsGroup = this.fb.group({});
+        this.fieldForm.setControl('fields', fieldsGroup);
+      }
+
+      for (const area of newSegment.areas) {
+        for (const config of area.fieldConfigurations) {
+          const key = config.id.toString();
+
+          if (!fieldsGroup.contains(key)) {
+            let defaultValue: any;
+            let validators = [Validators.required];
+
+            switch (config.type) {
+              case 'select':
+                defaultValue = [];
+                break;
+              case 'boolean':
+              case 'number':
+              case 'date':
+                defaultValue = null;
+                break;
+              case 'text':
+              default:
+                defaultValue = '';
+            }
+
+            fieldsGroup.addControl(key, new FormControl(defaultValue, validators));
+          }
+        }
+      }
+    },
+    error: (err: any) => {
+      console.error('Erreur lors de la récupération du segment :', err);
     }
-    Object.values(this.fieldForm.controls).forEach(ctrl => ctrl.updateValueAndValidity());
   });
-
-  }
-onContrainteChange(event: boolean): void {
-  this.contrainte = event;
-}
-
- loadFields() {
-    this.areaService.getFields().subscribe((data) => {
-      this.fields = data;
-      this.filtredItems = [...data];
-    });
-  }
-
-  getColumnValue(item: any, key: string): any {
-    return item[key];
-  }
-
-  onSearch(_: any) {
-    const filter = this.searchFormGroup.value;
-    this.filtredItems = this.fields.filter((item:any) => {
-      return Object.keys(filter).every((key) => {
-        const val = filter[key];
-        return !val || ('' + item[key]).toLowerCase().includes(val.toLowerCase());
-      });
-    });
-  }
-
-  sortBy(key: string) {
-    this.sortDirection = this.sortValue === key ? !this.sortDirection : true;
-    this.sortValue = key;
-    this.filtredItems.sort((a:any, b:any) => {
-      return this.sortDirection
-        ? ('' + a[key]).localeCompare('' + b[key])
-        : ('' + b[key]).localeCompare('' + a[key]);
-    });
-  }
-
-
-  onCheckboxChange(event: Event): void {
-  const inputElement = event.target as HTMLInputElement;
-  this.fieldForm.get('selected')?.setValue(inputElement.checked);
 }
 
 
-  onTypeChange(type: string): void {
-    console.log(type);
-
-  this.selectedType = type;
-  this.fieldForm.value.customBloc=""
-}
-
- onListAreaSelected(event: any) {
-  }
 
 
-  onListValueSelected(event: ListValueDTO) {
-      this.listeDeBlocsSelectionnee = !!event;
-     const selectedId = event?.id || null;
-  this.fieldForm.patchValue({ valueId: selectedId });
-this.demandeService.getValueItemSearch(event).subscribe({
-      next: (response:any) => {
-        this.listValueItems= response;
-        console.log('Champ ajoute avec succès :', response);
 
-      },
-      error: (err:any) => {
-        console.error('Erreur lors de la création du champ :', err);
+
+  submit(): void {
+    if (this.fieldForm.invalid) {
+      this.fieldForm.markAllAsTouched();
+      this.toasterService.danger('Formulaire invalide', 'Erreur');
+      return;
+    }
+
+    const segmentId = this.fieldForm.value.segment as number;
+    const fieldsGroup = this.fieldForm.get('fields') as FormGroup;
+    const allValues = fieldsGroup.getRawValue();
+
+    const fieldValues: any[] = [];
+
+    if (this.segement?.areas?.length) {
+      for (const area of this.segement.areas) {
+        for (const config of area.fieldConfigurations) {
+          const key = config.id.toString();
+          const value = allValues[key];
+
+          const fv: any = {
+            fieldConfigId: config.id,
+            areaId: area.id,
+          };
+
+          switch (config.type) {
+            case 'text':
+              if (value !== null && value !== '') fv.valueString = value;
+              break;
+
+            case 'number':
+              if (value !== null && value !== '') fv.valueLong = Number(value);
+              break;
+
+            case 'date':
+              if (value) {
+                fv.valueDate = formatDate(value, 'yyyy-MM-dd', 'en');
+              }
+              break;
+
+            case 'boolean':
+              if (value !== null && value !== undefined) fv.valueBoolean = value === true;
+              break;
+
+            case 'select':
+              fv.selectedRisqueValueItemIds = Array.isArray(value) ? value : (value ? [value] : []);
+              break;
+
+            default:
+              if (value !== null && value !== '') fv.valueString = value;
+          }
+
+          fieldValues.push(fv);
+        }
       }
-    });
-
-    this.donnees = [];
-    this.selectedRisksMap = {};
-  }
-
-   listValue(): void {
-      this.demandeService.getAllValues().subscribe({
-      next: (response:any) => {
-        this.listeValue= response;
-        console.log('Champ risque avec succès :', response);
-
-      },
-      error: (err:any) => {
-        console.error('Erreur lors de la création du champ :', err);
-      }
-    });
-
-  }
-
-    listAreas(): void {
-      this.demandeService.getAllAreas().subscribe({
-      next: (response:any) => {
-        this.listeArea= response;
-        console.log('Champ area avec succès :', response);
-
-      },
-      error: (err:any) => {
-        console.error('Erreur lors de la création du champ :', err);
-      }
-    });
-
-  }
-
-     getRisques(): void {
-      this.demandeService.getAllRisque().subscribe({
-      next: (response:any) => {
-        this.listRisque= response;
-        console.log('Champ ajoute avec succès :', response);
-
-      },
-      error: (err:any) => {
-        console.error('Erreur lors de la création du champ :', err);
-      }
-    });
-
-  }
-
-  @Output() deleteItem = new EventEmitter<any>();
-  onAddNewObject() {
-  }
-
-  navigateTo(item: any) {
-  }
-onSubmit(): void {
-  console.log(this.fieldForm);
-
-   if (this.fieldForm.invalid) {
-    Object.values(this.fieldForm.controls).forEach(control => {
-      control.markAsTouched();
-    });
-    return;
-  }
-
-
-
-  if (this.fieldForm.valid) {
-    const dto = this.fieldForm.value;
-    console.log(dto);
-
-    dto.risqueItemsValues = this.selectedRisks;
-    this.demandeService.createConfig(dto).subscribe({
-      next: (response:any) => {
-
-        console.log('Configuration créée :', response);
-        this.toasterService.success("Le champ est ceée avec succées")
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000);
-
-      },
-      error: (err:any) => {
-        this.toasterService.danger("Le code déja exist ")
-        console.error('Erreur :', err);
-      }
-    });
-  }else {
-    this.toasterService.warning("Il faut remplir tous les champs")
-  }
-}
-
-
- onRiskItemSelected(valueItem: any, selectedRisk: any): void {
-    const existing = this.selectedRisks.findIndex(r => r.valueItemId === valueItem.id);
-    const entry = { valueItemId: valueItem.id, riskId: selectedRisk.id };
-
-    if (existing !== -1) {
-      this.selectedRisks[existing] = entry;
     } else {
-      this.selectedRisks.push(entry);
+      console.warn('Aucune configuration de champ trouvée dans le segment');
     }
 
-    console.log('Sélections actuelles :', this.selectedRisks);
-  }
+    const payload = {
+      segmentId,
+      fieldValues
+    };
 
-  onRiskItemValue(selectedRisk: any):void{
-    console.log(selectedRisk);
-
-
-
-  }
-
-
-  onRiskListSelected(event: any): void {
-    console.log(event);
-          this.listeDeBlocsSelectionnee = !!event;
-
-         const selectedId = event?.id || null;
-  this.fieldForm.patchValue({ risqueValueId: selectedId });
-
-  this.demandeService.getAllRisqueSearch(event).subscribe({
-      next: (response:any) => {
-        this.riskValueItems= response;
-        console.log('Champ rrrr avec succès :', response);
-
+    this.notationService.saveNotation(payload).subscribe({
+      next: () => {
+        this.toasterService.success('Notation ajoutée avec succès ✅', 'Succès', {
+          status: 'success',
+          duration: 3000,
+          destroyByClick: true,
+          position: NbGlobalPhysicalPosition.TOP_RIGHT,
+          preventDuplicates: true
+        });
+        // reset
+        this.fieldForm.reset();
+        this.fieldForm.setControl('fields', this.fb.group({}));
+        this.segement = {} as SegmentDtoVues;
       },
-      error: (err:any) => {
-        console.error('Erreur lors de la création du champ :', err);
+      error: (err) => {
+        this.toasterService.danger('Erreur lors de l’ajout de la notation', 'Erreur');
+        console.error(err);
       }
     });
   }
-
-  //  onRiskItemSelected(valueItem: ListValueItemDTO, riskItem: RisqueValueItemDTO): void {
-  //   this.selectedRisksMap[valueItem.id] = riskItem;
-
-  //   const existingIndex = this.donnees.findIndex(d => d.value === valueItem.libelle);
-  //   if (existingIndex !== -1) {
-  //     this.donnees[existingIndex].niveauRisque = riskItem.libelle;
-  //   } else {
-  //     this.donnees.push({
-  //       value: valueItem.libelle,
-  //       niveauRisque: riskItem.libelle
-  //     });
-  //   }
-  // }
 }
 
+/////////////////////////tt///////////////////////////////////////////////////////
+public class FieldValueDTO {
+    private Long fieldConfigId;
+    private Long areaId;
 
+    private String valueString;
+    private Boolean valueBoolean;
+    private Long valueLong;
+    private String valueDate; // format ISO yyyy-MM-dd
 
-export interface ListValueItemDTO {
-  id: number;
-  code: string;
-  libelle: string;
-  valueId:number
-
-
-}
-export interface RisqueValueItemDTO {
-  id: number | string;
-  code: string;
-  libelle: string;
-}
-export interface FieldConfigurationDTO {
-  id: number;
-  code: string;
-  libelle: string;
-  type: string;
-  valueId: number;
-  expression: string;
-  areasId: Set<number>;
-  risqueValueId: number;
-  areaId:number[]
-}
-
-
-////service utilise dans champs////
-
-import { Injectable } from '@angular/core';
-import {environment} from "../../../../environments/environment";
-import {HttpClient, HttpParams} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {ApiResponse, AreaDTO, AreaSearchDTO, FieldConfigurationDTO, SegmentDTO} from "../model/fieldConfig";
-
-@Injectable({
-  providedIn: 'root'
-})
-export class AreaServiceService {
-
-  private readonly API: string = `${environment.api.url}`;
-  constructor(private http: HttpClient) {
-  }
-  public getAreas(id:number): Observable<Array<AreaDTO>> {
-    return this.http.get<Array<AreaDTO>>(this.API + "areas/search/" + id)
-  }
-  getFields(): Observable<FieldConfigurationDTO[]> {
-    return this.http.get<FieldConfigurationDTO[]>(`${this.API}field-configurations`);
-  }
-
- /* getFields(ids: number[]): Observable<FieldConfigurationDTO[]> {
-    const params = new HttpParams().set('ids', ids.join(','));
-    return this.http.get<FieldConfigurationDTO[]>(`${this.API}fields/search`, { params });
-  }*/
-
-
-  saveAreaFields(payload: { fieldConfigurationIds: number[]; areaId: number | null }):Observable<ApiResponse> {
-    return this.http.post<ApiResponse>(this.API + 'areas/associate-fields', payload);
-  }
-}
-
-
-
-////service////
-
-
-
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { AreaDTO, FieldConfigurationDTO, ListValueDTO, ListValueItemDTO, RisqueValueItemDTO, RisqueValueListDTO } from '../traitement-demande/model/fieldConfig';
-import { environment } from 'src/environments/environment';
-import {HttpClient} from "@angular/common/http";
-
-@Injectable({
-  providedIn: 'root'
-})
-export class TraitementsService {
-
-  private apiUrl = environment.api.url
-
-  constructor(private http: HttpClient) {}
-
-getAllValues(): Observable<ListValueDTO[]> {
-    return this.http.get<ListValueDTO[]>(this.apiUrl+"list-values");
-  }
-
-getValueItemSearch(dto: ListValueDTO): Observable<ListValueItemDTO[]> {
-    return this.http.post<ListValueItemDTO[]>(this.apiUrl+"list-value-items/search", dto);
-  }
-
-  getAllRisque(): Observable<RisqueValueItemDTO[]> {
-    return this.http.get<RisqueValueItemDTO[]>(this.apiUrl+"risque-value-lists");
-  }
-
-    getAllRisqueSearch(dto: RisqueValueItemDTO): Observable<RisqueValueItemDTO[]> {
-    return this.http.post<RisqueValueItemDTO[]>(this.apiUrl+"risque-value-items/search",dto);
-    }
-
-    createConfig(dto: any): Observable<any[]> {
-    return this.http.post<any[]>(this.apiUrl+"field-configurations",dto);
-    }
-
-
-      getAllAreas(): Observable<AreaDTO[]> {
-    return this.http.get<any[]>(this.apiUrl+"areas");
-  }
-
-
-
-}
-
-
-
-////service utilise dans notation////
-import { RisqueValueListDTO } from '../../features/traitement-demande/model/fieldConfig';
-export interface Referentiel {
-  id:number
-  code:string
-  libelle:string
-  expression: string;
-  segementId?: number;
-  valueId?: number;
-  risqueValueListsId?:number;
-  risqueValueId?:number;
-}
-export interface ReferentielTypes{
-  value : string;
-  label : string;
-  hasExpression : boolean;
-}
-
-import { AreasVueDto } from "./areaVue";
-
-export interface SegmentDtoVues {
-  id: number;
-  code: string;
-  libelle: string;
-  areas: AreasVueDto[];
-}
-import { FieldConfigVueDto } from "./fieldConfiguration";
-
-export interface AreasVueDto {
-  id: number;
-  code: string;
-  libelle: string;
-  fieldConfigurations: FieldConfigVueDto[];
-}
-
-import { ValueItemRisqueItemVueDto } from "./valueItemRisqueItemVueDto";
-
-export interface FieldConfigVueDto {
-  id: number;
-  code: string;
-  libelle: string;
-  type: string;
-  expression: string;
-  selected: boolean;
-  searchable:boolean;
-  customBloc:string;
-  dateBloc: Date;
-  risqueValueId:number;
-  risqueValueList: ValueItemRisqueItemVueDto[];
-}
-import { ListValueItemVueDto } from "./listeValueItemDto";
-import { RisqueValueItemVueDto } from "./risqueValueItemVueDto";
-
-export interface ValueItemRisqueItemVueDto {
-  id: number;
-  listValueItem: ListValueItemVueDto;
-  risqueValueItem: RisqueValueItemVueDto;
-}
-export interface ListValueItemVueDto {
-  id: number;
-  code: string;
-  libelle: string;
-}
-import { RisqueItemWeightDto } from "./risqueItemWeightDto";
-
-export interface RisqueValueItemVueDto {
-  id: number;
-  code: string;
-  libelle: string;
-  weight: RisqueItemWeightDto;
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-architecture proposée.
-
-Backend Java (Spring Boot, JPA)
-
-Entités
-
-@Entity
-@Table(name = "notations")
-public class Notation {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "segment_id")
-private Segment segment;
-
-private LocalDateTime dateSaisie;
-private BigDecimal totalScore;
-
-@OneToMany(mappedBy = "notation", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<NotationValue> values = new ArrayList<>();
-
-// getters/setters
-}
-
-@Entity
-@Table(name = "notation_values")
-public class NotationValue {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "notation_id")
-private Notation notation;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "field_configuration_id")
-private FieldConfiguration fieldConfiguration;
-
-private String type; // text | date | boolean | select
-private String rawValue; // ISO string / boolean as string / text
-private BigDecimal score; // score partiel du champ
-
-@OneToMany(mappedBy = "notationValue", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<NotationValueSelect> selects = new ArrayList<>();
-
-// getters/setters
-}
-
-@Entity
-@Table(name = "notation_value_selects")
-public class NotationValueSelect {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "notation_value_id")
-private NotationValue notationValue;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "list_value_item_id")
-private ListValueItem listValueItem;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "risque_value_item_id")
-private RisqueValueItem risqueValueItem;
-
-private BigDecimal weightApplied;
-private BigDecimal score;
-
-// getters/setters
-}
-
-DTOs
-
-public class NotationItemCreateDTO {
-private Long fieldConfigurationId;
-private String type; // text | date | boolean | select
-private String value; // pour text/date/boolean (stringifié)
-private List<Long> selectedValueItemIds; // pour select
-// getters/setters
-}
-
-public class NotationCreateDTO {
-private Long segmentId;
-private List<NotationItemCreateDTO> items;
-// getters/setters
-}
+    // Pour les selects
+    private List<Long> selectedValueItemIds;
+    private List<Long> selectedRisqueValueItemIds;
 
 public class NotationDTO {
-private Long id;
-private Long segmentId;
-private BigDecimal totalScore;
-private LocalDateTime dateSaisie;
-// getters/setters
-}
+    private Long id;
+    private Long segmentId;
+    private String level;
+    private Double riskScore;
+    private LocalDateTime createdAt;
+////////////////////////////
+public class NotationSaveDTO {
+    private Long segmentId;
+    private String level;
+    private List<FieldValueDTO> fieldValues;
+/.//////////////////////////@Entity
+public class FieldValue {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-Repositories
+    @ManyToOne(optional = false)
+    private Notation notation;
 
-public interface NotationRepository extends JpaRepository<Notation, Long> {}
-public interface NotationValueRepository extends JpaRepository<NotationValue, Long> {}
-public interface NotationValueSelectRepository extends JpaRepository<NotationValueSelect, Long> {}
+    @ManyToOne(optional = false)
+    private FieldConfiguration fieldConfiguration;
 
-Services (poids + fonction sont mockés pour l’exemple)
+    @ManyToOne
+    private Area area;
 
-@Service
-public class WeightService {
-public BigDecimal findWeight(FieldConfiguration fc, Long riskId) {
-// TODO: récupérer le poids réel depuis la config/BDD
-return BigDecimal.ONE; // défaut = 1
-}
-}
+    @Column
+    private String valueString;
 
-@Service
-public class FonctionService {
-// Retourne un multiplicateur selon la fonction et data externe (ex: max 12 mois)
-public BigDecimal adjustWithFonction(FieldConfiguration fc, Long valueItemId, Long riskId) {
-if (!fc.isFonction()) return BigDecimal.ONE;
-switch (fc.getFonctionType()) {
-case PRODUIT:
-// TODO: lire table produit_stats et prendre MAX sur 12 mois
-return BigDecimal.valueOf(1.5);
-case CASH:
-case CONTRACT:
-case PAYE:
-// TODO: implémenter règles
-return BigDecimal.ONE;
-default:
-return BigDecimal.ONE;
-}
-}
-}
+    @Column
+    private Boolean valueBoolean;
 
-@Service
-public class RuleService {
-public BigDecimal scoreNonSelect(FieldConfiguration fc, String rawValue) {
-// Exemple simple: boolean true = 1, false = 0
-if ("boolean".equalsIgnoreCase(fc.getType())) {
-return "true".equalsIgnoreCase(rawValue) ? BigDecimal.ONE : BigDecimal.ZERO;
-}
-return BigDecimal.ZERO;
-}
-}
+    @Column
+    private Long valueLong;
 
-@Service
-public class NotationService {
+    @Column
+    private LocalDate valueDate;
 
-private final NotationRepository notationRepo;
-private final FieldConfigurationRepository fieldConfigRepo;
-private final SegmentRepository segmentRepo;
-private final WeightService weightService;
-private final FonctionService fonctionService;
-private final RuleService ruleService;
+    @Column
+    private String selectedValueItemIdsCsv;
 
-public NotationService(NotationRepository notationRepo,
-FieldConfigurationRepository fieldConfigRepo,
-SegmentRepository segmentRepo,
-WeightService weightService,
-FonctionService fonctionService,
-RuleService ruleService) {
-this.notationRepo = notationRepo;
-this.fieldConfigRepo = fieldConfigRepo;
-this.segmentRepo = segmentRepo;
-this.weightService = weightService;
-this.fonctionService = fonctionService;
-this.ruleService = ruleService;
-}
+    @Column
+    private String selectedRisqueValueItemIdsCsv;
 
-@Transactional
-public NotationDTO save(NotationCreateDTO dto) {
-Segment segment = segmentRepo.findById(dto.getSegmentId())
-.orElseThrow(() -> new RuntimeException("Segment introuvable"));
+///////////////////////////////////////////////
 
-text
-Notation notation = new Notation();
-notation.setSegment(segment);
-notation.setDateSaisie(LocalDateTime.now());
 
-BigDecimal total = BigDecimal.ZERO;
 
-for (NotationItemCreateDTO it : dto.getItems()) {
-  FieldConfiguration fc = fieldConfigRepo.findById(it.getFieldConfigurationId())
-    .orElseThrow(() -> new RuntimeException("FieldConfiguration introuvable: " + it.getFieldConfigurationId()));
-
-  NotationValue nv = new NotationValue();
-  nv.setNotation(notation);
-  nv.setFieldConfiguration(fc);
-  nv.setType(fc.getType());
-
-  BigDecimal scoreField = BigDecimal.ZERO;
-
-  if ("select".equalsIgnoreCase(fc.getType())) {
-    if (it.getSelectedValueItemIds() == null || it.getSelectedValueItemIds().isEmpty()) {
-      // passer si non obligatoire, sinon throw
-      nv.setScore(BigDecimal.ZERO);
-    } else {
-      // map listValueItem -> risqueValueItem depuis la config
-      Map<Long, Long> valueToRisk = fc.getValueItemRisqueItem().stream()
-        .collect(Collectors.toMap(m -> m.getListValueItem().getId(), m -> m.getRisqueValueItem().getId()));
-
-      for (Long valueItemId : it.getSelectedValueItemIds()) {
-        Long riskId = valueToRisk.get(valueItemId);
-        if (riskId == null) throw new RuntimeException("Aucun risque mappé pour item: " + valueItemId);
-
-        BigDecimal poids = weightService.findWeight(fc, riskId);
-        BigDecimal func = fonctionService.adjustWithFonction(fc, valueItemId, riskId);
-        BigDecimal itemScore = poids.multiply(func);
-
-        NotationValueSelect nvs = new NotationValueSelect();
-        nvs.setNotationValue(nv);
-        nvs.setListValueItem(new ListValueItem(valueItemId));
-        nvs.setRisqueValueItem(new RisqueValueItem(riskId));
-        nvs.setWeightApplied(poids);
-        nvs.setScore(itemScore);
-        nv.getSelects().add(nvs);
-
-        scoreField = scoreField.add(itemScore);
-      }
-      nv.setScore(scoreField);
-    }
-  } else {
-    nv.setRawValue(it.getValue());
-    scoreField = ruleService.scoreNonSelect(fc, it.getValue());
-    nv.setScore(scoreField);
-  }
-
-  notation.getValues().add(nv);
-  total = total.add(scoreField);
-}
-
-notation.setTotalScore(total);
-notationRepo.save(notation);
-
-NotationDTO out = new NotationDTO();
-out.setId(notation.getId());
-out.setSegmentId(segment.getId());
-out.setTotalScore(total);
-out.setDateSaisie(notation.getDateSaisie());
-return out;
-}
-
-public NotationDTO getById(Long id) {
-Notation n = notationRepo.findById(id).orElseThrow(() -> new RuntimeException("Notation introuvable"));
-NotationDTO dto = new NotationDTO();
-dto.setId(n.getId());
-dto.setSegmentId(n.getSegment().getId());
-dto.setTotalScore(n.getTotalScore());
-dto.setDateSaisie(n.getDateSaisie());
-return dto;
-}
-}
-
-Contrôleur
-
-@RestController
-@RequestMapping("/api/notations")
-public class NotationController {
-
-private final NotationService notationService;
-
-public NotationController(NotationService notationService) {
-this.notationService = notationService;
-}
-
-@PostMapping
-public ResponseEntity<NotationDTO> create(@RequestBody NotationCreateDTO dto) {
-NotationDTO out = notationService.save(dto);
-return ResponseEntity.status(HttpStatus.CREATED).body(out);
-}
-
-@GetMapping("/{id}")
-public ResponseEntity<NotationDTO> get(@PathVariable Long id) {
-return ResponseEntity.ok(notationService.getById(id));
-}
-}
-
-SQL minimal (PostgreSQL)
-
-CREATE TABLE notations (
-id BIGSERIAL PRIMARY KEY,
-segment_id BIGINT NOT NULL,
-date_saisie TIMESTAMP NOT NULL,
-total_score NUMERIC(18,6) NOT NULL DEFAULT 0
-);
-
-CREATE TABLE notation_values (
-id BIGSERIAL PRIMARY KEY,
-notation_id BIGINT NOT NULL REFERENCES notations(id) ON DELETE CASCADE,
-field_configuration_id BIGINT NOT NULL,
-type VARCHAR(32) NOT NULL,
-raw_value TEXT,
-score NUMERIC(18,6) NOT NULL DEFAULT 0
-);
-
-CREATE TABLE notation_value_selects (
-id BIGSERIAL PRIMARY KEY,
-notation_value_id BIGINT NOT NULL REFERENCES notation_values(id) ON DELETE CASCADE,
-list_value_item_id BIGINT NOT NULL,
-risque_value_item_id BIGINT NOT NULL,
-weight_applied NUMERIC(18,6),
-score NUMERIC(18,6) NOT NULL DEFAULT 0
-);
-
-Frontend Angular
-
-Service HTTP
-
-@Injectable({ providedIn: 'root' })
-export class NotationService {
-constructor(private http: HttpClient) {}
-private base = '/api/notations';
-
-create(payload: any) {
-return this.http.post(this.base, payload);
-}
-
-getById(id: number) {
-return this.http.get(${this.base}/${id});
-}
-}
-
-Construction du payload dans un composant
-
-submit() {
-const payload = {
-segmentId: this.selectedSegmentId,
-items: [] as any[]
-};
-
-for (const area of this.segment.areas) {
-for (const fc of area.fieldConfigurations) {
-const ctrl = this.form.get('f_' + fc.id);
-if (fc.type === 'select') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'select',
-selectedValueItemIds: ctrl?.value || []
-});
-} else if (fc.type === 'boolean') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'boolean',
-value: ctrl?.value === true ? 'true' : 'false'
-});
-} else if (fc.type === 'date') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'date',
-value: ctrl?.value ? new Date(ctrl.value).toISOString() : null
-});
-} else {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'text',
-value: ctrl?.value ?? ''
-});
-}
-}
-}
-
-this.notationService.create(payload).subscribe({
-next: (res) => { /* toast success / },
-error: (err) => { / afficher message */ }
-});
-}
-
-Exemple de mapping “valueItem -> risque” côté FieldConfiguration
-
-Hypothèse: FieldConfiguration a une collection valueItemRisqueItem (liste d’objets avec listValueItem et risqueValueItem)
-
-Si vous n’avez pas encore l’entité, vous pouvez créer:
 
 @Entity
-@Table(name = "field_valueitem_risqueitem")
-public class FieldValueItemRisqueItem {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
-@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "field_configuration_id")
-private FieldConfiguration fieldConfiguration;
-
-@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "list_value_item_id")
-private ListValueItem listValueItem;
-
-@ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "risque_value_item_id")
-private RisqueValueItem risqueValueItem;
-}
-///////////////////////////////////////////HTHH//////////////////////////////////////////////
-
-Entities (domaine)
-
-Fichier: src/main/java/com/example/domain/Notation.java
-@Entity
-@Table(name = "notations")
 public class Notation {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "segment_id", nullable = false)
-private Segment segment;
+    @ManyToOne(optional = false)
+    private Segment segment;
 
-private LocalDateTime dateSaisie;
+    @OneToMany(mappedBy = "notation", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FieldValue> fieldValues = new ArrayList<>();
 
-// totalScore = 0 pour le moment, calculé plus tard
-@Column(nullable = false)
-private BigDecimal totalScore = BigDecimal.ZERO;
+    @Column(length = 4, nullable = false)
+    private String level;
 
-@OneToMany(mappedBy = "notation", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<NotationValue> values = new ArrayList<>();
+    private Double riskScore = 0.0;
 
-// getters/setters
-}
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-Fichier: src/main/java/com/example/domain/NotationValue.java
-@Entity
-@Table(name = "notation_values")
-public class NotationValue {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
+/////////////////////////////////////////////
+package com.sahambank.fccr.core.service.Impl;
 
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "notation_id", nullable = false)
-private Notation notation;
 
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "field_configuration_id", nullable = false)
-private FieldConfiguration fieldConfiguration;
+import com.sahambank.fccr.core.dto.FieldValueDTO;
+import com.sahambank.fccr.core.dto.NotationDTO;
+import com.sahambank.fccr.core.dto.NotationSaveDTO;
+import com.sahambank.fccr.core.entities.*;
+import com.sahambank.fccr.core.repository.*;
+import com.sahambank.fccr.core.service.NotationService;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-// on fige le type au moment de la saisie (utile si la config change)
-@Column(nullable = false)
-private String type; // text | date | boolean | select
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
-// pour text/date/boolean (stringifié). Pour select, laisser null.
-@Column(columnDefinition = "text")
-private String rawValue;
-
-// score partiel = 0 pour le moment
-@Column(nullable = false)
-private BigDecimal score = BigDecimal.ZERO;
-
-@OneToMany(mappedBy = "notationValue", cascade = CascadeType.ALL, orphanRemoval = true)
-private List<NotationValueSelect> selects = new ArrayList<>();
-
-// getters/setters
-}
-
-Fichier: src/main/java/com/example/domain/NotationValueSelect.java
-@Entity
-@Table(name = "notation_value_selects")
-public class NotationValueSelect {
-@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-private Long id;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "notation_value_id", nullable = false)
-private NotationValue notationValue;
-
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "list_value_item_id", nullable = false)
-private ListValueItem listValueItem;
-
-// on laisse nul pour le moment; sera rempli lors du calcul
-@ManyToOne(fetch = FetchType.LAZY)
-@JoinColumn(name = "risque_value_item_id")
-private RisqueValueItem risqueValueItem;
-
-// poids et score à 0 pour le moment
-@Column(nullable = false)
-private BigDecimal weightApplied = BigDecimal.ZERO;
-
-@Column(nullable = false)
-private BigDecimal score = BigDecimal.ZERO;
-
-// getters/setters
-}
-
-Remarques:
-
-Segment, FieldConfiguration, ListValueItem, RisqueValueItem: utilise tes classes existantes (ou mets des stubs si besoin).
-
-type est copié depuis FieldConfiguration.getType() au moment du save.
-
-DTOs (entrées/sorties API)
-
-Fichier: src/main/java/com/example/api/dto/NotationItemCreateDTO.java
-public class NotationItemCreateDTO {
-private Long fieldConfigurationId;
-private String type; // text|date|boolean|select (optionnel si tu veux le déduire côté back)
-private String value; // text/date/boolean stringifié
-private List<Long> selectedValueItemIds; // pour select
-// getters/setters
-}
-
-Fichier: src/main/java/com/example/api/dto/NotationCreateDTO.java
-public class NotationCreateDTO {
-private Long segmentId;
-private List<NotationItemCreateDTO> items;
-// getters/setters
-}
-
-Fichier: src/main/java/com/example/api/dto/NotationDTO.java
-public class NotationDTO {
-private Long id;
-private Long segmentId;
-private LocalDateTime dateSaisie;
-private BigDecimal totalScore; // 0 pour le moment
-// getters/setters
-}
-
-Repositories
-
-Fichier: src/main/java/com/example/repository/NotationRepository.java
-public interface NotationRepository extends JpaRepository<Notation, Long> {}
-
-Fichier: src/main/java/com/example/repository/NotationValueRepository.java
-public interface NotationValueRepository extends JpaRepository<NotationValue, Long> {}
-
-Fichier: src/main/java/com/example/repository/NotationValueSelectRepository.java
-public interface NotationValueSelectRepository extends JpaRepository<NotationValueSelect, Long> {}
-
-Service (save sans calcul, mais prêt pour ajouter la logique)
-
-Fichier: src/main/java/com/example/service/NotationService.java
 @Service
-public class NotationService {
-
-private final NotationRepository notationRepo;
-private final SegmentRepository segmentRepo;
-private final FieldConfigurationRepository fieldConfigRepo;
-
-public NotationService(NotationRepository notationRepo,
-SegmentRepository segmentRepo,
-FieldConfigurationRepository fieldConfigRepo) {
-this.notationRepo = notationRepo;
-this.segmentRepo = segmentRepo;
-this.fieldConfigRepo = fieldConfigRepo;
-}
-
 @Transactional
-public NotationDTO save(NotationCreateDTO dto) {
-Segment segment = segmentRepo.findById(dto.getSegmentId())
-.orElseThrow(() -> new IllegalArgumentException("Segment introuvable: " + dto.getSegmentId()));
+public class NotationServiceImpl implements NotationService {
 
-text
-Notation notation = new Notation();
-notation.setSegment(segment);
-notation.setDateSaisie(LocalDateTime.now());
-notation.setTotalScore(BigDecimal.ZERO); // pas de calcul pour le moment
+    private final NotationRepository notationRepository;
+    private final SegmentRepository segmentRepository;
+    private final FieldConfigurationRepository fieldConfigRepository;
+    private final AreaRepository areaRepository;
+    private final ListValueItemRepository listValueItemRepository;
+    private final RisqueValueItemRepository risqueValueItemRepository;
 
-if (dto.getItems() != null) {
-  for (NotationItemCreateDTO it : dto.getItems()) {
-    FieldConfiguration fc = fieldConfigRepo.findById(it.getFieldConfigurationId())
-      .orElseThrow(() -> new IllegalArgumentException("FieldConfiguration introuvable: " + it.getFieldConfigurationId()));
-
-    NotationValue nv = new NotationValue();
-    nv.setNotation(notation);
-    nv.setFieldConfiguration(fc);
-    nv.setType(fc.getType()); // on fige le type depuis la config
-    nv.setScore(BigDecimal.ZERO); // sera calculé plus tard
-
-    if ("select".equalsIgnoreCase(fc.getType())) {
-      List<Long> selectedIds = (it.getSelectedValueItemIds() == null) ? List.of() : it.getSelectedValueItemIds();
-      for (Long valueItemId : selectedIds) {
-        NotationValueSelect nvs = new NotationValueSelect();
-        nvs.setNotationValue(nv);
-        nvs.setListValueItem(new ListValueItem(valueItemId)); // référence par id
-        // risque/poids/score seront calculés plus tard
-        nvs.setRisqueValueItem(null);
-        nvs.setWeightApplied(BigDecimal.ZERO);
-        nvs.setScore(BigDecimal.ZERO);
-        nv.getSelects().add(nvs);
-      }
-    } else {
-      // text/date/boolean en string, tel que reçu
-      nv.setRawValue(it.getValue());
+    public NotationServiceImpl(NotationRepository notationRepository,
+                               SegmentRepository segmentRepository,
+                               FieldConfigurationRepository fieldConfigRepository,
+                               AreaRepository areaRepository,
+                               ListValueItemRepository listValueItemRepository,
+                               RisqueValueItemRepository risqueValueItemRepository) {
+        this.notationRepository = notationRepository;
+        this.segmentRepository = segmentRepository;
+        this.fieldConfigRepository = fieldConfigRepository;
+        this.areaRepository = areaRepository;
+        this.listValueItemRepository = listValueItemRepository;
+        this.risqueValueItemRepository = risqueValueItemRepository;
     }
 
-    notation.getValues().add(nv);
-  }
+    {}
+
+    @Override
+    public NotationDTO saveNotation(NotationSaveDTO dto) {
+        Segment segment = segmentRepository.findById(dto.getSegmentId())
+                .orElseThrow(() -> new IllegalArgumentException("Segment introuvable: " + dto.getSegmentId()));
+
+        String level = normalizeLevel(dto.getLevel());
+
+        Notation notation = new Notation();
+        notation.setSegment(segment);
+        notation.setLevel(level);
+        notation.setCreatedAt(LocalDateTime.now());
+
+        double totalScore = 0.0;
+        List<FieldValue> fieldValues = new ArrayList<>();
+
+        for (FieldValueDTO fvDto : dto.getFieldValues()) {
+            FieldConfiguration config = fieldConfigRepository.findById(fvDto.getFieldConfigId())
+                    .orElseThrow(() -> new IllegalArgumentException("FieldConfiguration introuvable: " + fvDto.getFieldConfigId()));
+
+            FieldValue fv = new FieldValue();
+            fv.setNotation(notation);
+            fv.setFieldConfiguration(config);
+
+            Area area = null;
+            if (fvDto.getAreaId() != null) {
+                area = areaRepository.findById(fvDto.getAreaId())
+                        .orElseThrow(() -> new IllegalArgumentException("Area introuvable: " + fvDto.getAreaId()));
+                fv.setArea(area);
+            }
+
+            // 1) Mapper la valeur typée
+            applyTypedValue(fv, config, fvDto);
+
+            // 2) Mapper les listes de sélection (si select)
+            if (fvDto.getSelectedValueItemIds() != null && !fvDto.getSelectedValueItemIds().isEmpty()) {
+                fv.setSelectedValueItemIdsCsv(joinCsv(fvDto.getSelectedValueItemIds()));
+            }
+            if (fvDto.getSelectedRisqueValueItemIds() != null && !fvDto.getSelectedRisqueValueItemIds().isEmpty()) {
+                fv.setSelectedRisqueValueItemIdsCsv(joinCsv(fvDto.getSelectedRisqueValueItemIds()));
+            }
+
+            fieldValues.add(fv);
+
+            // 3) Calcul du score si ce champ est fonctionnel
+            if (Boolean.TRUE.equals(config.isFonction())) {
+                double fieldScore = computeFieldScore(config, area, fvDto, level);
+                totalScore += fieldScore;
+            }
+        }
+
+        notation.setFieldValues(fieldValues);
+
+        // IMPORTANT: Assure-toi que riskScore est de type double/Double dans Notation.
+        // Option A (recommandée): setter double
+        notation.setRiskScore(totalScore);
+
+        // Option B (si riskScore est un int et DOIT le rester), choisis une conversion explicite:
+        // notation.setRiskScore((int) Math.round(totalScore)); // arrondi
+        // notation.setRiskScore((int) totalScore);             // troncature
+
+        Notation saved = notationRepository.save(notation);
+
+        NotationDTO out = new NotationDTO();
+        out.setId(saved.getId());
+        out.setSegmentId(saved.getSegment().getId());
+        out.setLevel(saved.getLevel());
+        out.setRiskScore(saved.getRiskScore());
+        out.setCreatedAt(saved.getCreatedAt());
+        return out;
+    }
+
+    private String normalizeLevel(String level) {
+        if (level == null) return "ML";
+        level = level.trim().toUpperCase();
+        return switch (level) {
+            case "L", "ML", "MH" -> level;
+            default -> "ML";
+        };
+    }
+
+    private void applyTypedValue(FieldValue fv, FieldConfiguration config, FieldValueDTO dto) {
+        String type = config.getType() != null ? config.getType().toLowerCase() : "";
+
+        switch (type) {
+            case "boolean" -> fv.setValueBoolean(Boolean.TRUE.equals(dto.getValueBoolean()));
+            case "number" -> {
+                if (dto.getValueLong() != null) {
+                    fv.setValueLong(dto.getValueLong());
+                }
+            }
+            case "date" -> {
+                if (dto.getValueDate() != null && !dto.getValueDate().isBlank()) {
+                    fv.setValueDate(LocalDate.parse(dto.getValueDate()));
+                }
+            }
+            case "text" -> fv.setValueString(dto.getValueString());
+            case "select" -> fv.setValueString(dto.getValueString());
+            default -> {
+                if (dto.getValueString() != null) fv.setValueString(dto.getValueString());
+                if (dto.getValueBoolean() != null) fv.setValueBoolean(dto.getValueBoolean());
+                if (dto.getValueLong() != null) fv.setValueLong(dto.getValueLong());
+                if (dto.getValueDate() != null && !dto.getValueDate().isBlank()) {
+                    fv.setValueDate(LocalDate.parse(dto.getValueDate()));
+                }
+            }
+        }
+    }
+
+    private double computeFieldScore(FieldConfiguration config, Area area, FieldValueDTO fvDto, String level) {
+        Set<RisqueValueItem> selectedRisks = new HashSet<>();
+
+        if (fvDto.getSelectedRisqueValueItemIds() != null && !fvDto.getSelectedRisqueValueItemIds().isEmpty()) {
+            selectedRisks.addAll(
+                    risqueValueItemRepository.findAllById(fvDto.getSelectedRisqueValueItemIds())
+            );
+        }
+
+        if (fvDto.getSelectedValueItemIds() != null && !fvDto.getSelectedValueItemIds().isEmpty()) {
+            List<ListValueItem> listItems =
+                    listValueItemRepository.findAllById(fvDto.getSelectedValueItemIds());
+
+            for (ListValueItem li : listItems) {
+                if (li.getAssociations() != null) {
+                    li.getAssociations().forEach(assoc -> {
+                        if (assoc.getRisqueValueItem() != null) {
+                            selectedRisks.add(assoc.getRisqueValueItem());
+                        }
+                    });
+                }
+            }
+        }
+
+        if (selectedRisks.isEmpty()) return 0.0;
+
+        Long areaId = (area != null) ? area.getId() : null;
+        double sum = 0.0;
+        String lvl = (level != null) ? level.toUpperCase() : "";
+
+        for (RisqueValueItem riskItem : selectedRisks) {
+            if (riskItem.getWeights() == null) continue;
+
+            Optional<RisqueItemWeight> weightOpt = riskItem.getWeights().stream()
+                    .filter(w -> w.getFieldConfiguration() != null &&
+                            Objects.equals(w.getFieldConfiguration().getId(), config.getId()) &&
+                            (areaId == null || (w.getArea() != null &&
+                                    Objects.equals(w.getArea().getId(), areaId))))
+                    .findFirst();
+
+            if (weightOpt.isEmpty()) continue;
+
+            RisqueItemWeight w = weightOpt.get();
+
+            switch (lvl) {
+                case "L"  -> sum += safe(w.getWeightL());  // int -> double
+                case "MH" -> sum += safe(w.getWeightMh());
+                default   -> sum += safe(w.getWeightMl());  // ML par défaut
+            }
+        }
+
+        return sum;
+    }
+
+    // Conversion sûre: int -> double
+    private static double safe(int value) {
+        return (double) value;
+    }
+
+    private static String joinCsv(List<Long> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.joining(","));
+    }
 }
-
-notationRepo.save(notation);
-
-NotationDTO out = new NotationDTO();
-out.setId(notation.getId());
-out.setSegmentId(segment.getId());
-out.setDateSaisie(notation.getDateSaisie());
-out.setTotalScore(notation.getTotalScore()); // 0
-return out;
-}
-
-@Transactional(readOnly = true)
-public NotationDTO getById(Long id) {
-Notation n = notationRepo.findById(id)
-.orElseThrow(() -> new NoSuchElementException("Notation introuvable: " + id));
-
-text
-NotationDTO dto = new NotationDTO();
-dto.setId(n.getId());
-dto.setSegmentId(n.getSegment().getId());
-dto.setDateSaisie(n.getDateSaisie());
-dto.setTotalScore(n.getTotalScore());
-return dto;
-}
-}
-
-Controller
-
-Fichier: src/main/java/com/example/api/NotationController.java
-@RestController
-@RequestMapping("/api/notations")
-public class NotationController {
-
-private final NotationService service;
-
-public NotationController(NotationService service) {
-this.service = service;
-}
-
-@PostMapping
-public ResponseEntity<NotationDTO> create(@RequestBody NotationCreateDTO dto) {
-NotationDTO out = service.save(dto);
-return ResponseEntity.status(HttpStatus.CREATED).body(out);
-}
-
-@GetMapping("/{id}")
-public ResponseEntity<NotationDTO> get(@PathVariable Long id) {
-return ResponseEntity.ok(service.getById(id));
-}
-}
-
-SQL (PostgreSQL)
-
-Fichier: db/migration/V1__create_notation_tables.sql
-CREATE TABLE notations (
-id BIGSERIAL PRIMARY KEY,
-segment_id BIGINT NOT NULL,
-date_saisie TIMESTAMP NOT NULL,
-total_score NUMERIC(18,6) NOT NULL DEFAULT 0
+//////////////////////////////////
+-- ********************************* Table notation **********************************************
+CREATE TABLE IF NOT EXISTS notation (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    segment_id BIGINT NOT NULL,
+    level VARCHAR(4),
+    risk_score DOUBLE PRECISION DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notation_segment FOREIGN KEY (segment_id) REFERENCES segment(id)
 );
 
-CREATE TABLE notation_values (
-id BIGSERIAL PRIMARY KEY,
-notation_id BIGINT NOT NULL REFERENCES notations(id) ON DELETE CASCADE,
-field_configuration_id BIGINT NOT NULL,
-type VARCHAR(32) NOT NULL,
-raw_value TEXT,
-score NUMERIC(18,6) NOT NULL DEFAULT 0
+-- ********************************* Table field_value **********************************************
+CREATE TABLE IF NOT EXISTS field_value (
+    id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    notation_id BIGINT NOT NULL,
+    field_configuration_id BIGINT NOT NULL,
+    area_id BIGINT,
+    value_string VARCHAR(255),
+    value_long BIGINT,
+    value_boolean BOOLEAN,
+    value_date DATE,
+    selected_value_item_ids_csv TEXT,
+    selected_risque_value_item_ids_csv TEXT,
+    CONSTRAINT fk_field_value_notation FOREIGN KEY (notation_id) REFERENCES notation(id) ON DELETE CASCADE,
+    CONSTRAINT fk_field_value_field_configuration FOREIGN KEY (field_configuration_id) REFERENCES field_configuration(id),
+    CONSTRAINT fk_field_value_area FOREIGN KEY (area_id) REFERENCES area(id)
 );
+/////////////////////////////////
+package com.sahambank.fccr.core.mapper;
 
-CREATE TABLE notation_value_selects (
-id BIGSERIAL PRIMARY KEY,
-notation_value_id BIGINT NOT NULL REFERENCES notation_values(id) ON DELETE CASCADE,
-list_value_item_id BIGINT NOT NULL,
-risque_value_item_id BIGINT NULL,
-weight_applied NUMERIC(18,6) NOT NULL DEFAULT 0,
-score NUMERIC(18,6) NOT NULL DEFAULT 0
-);
+import com.sahambank.fccr.core.entities.*;
+import com.sahambank.fccr.core.dto.FieldConfig.FieldConfigurationDTO;
+import com.sahambank.fccr.core.dto.FieldConfigurationCreateDTO;
+import com.sahambank.fccr.core.dto.ValueItemRisqueItemDto;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-Frontend: payload (exemple)
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-Fichier: src/app/services/notation.service.ts
-@Injectable({ providedIn: 'root' })
-export class NotationService {
-private base = '/api/notations';
-constructor(private http: HttpClient) {}
-create(payload: any) { return this.http.post(this.base, payload); }
-getById(id: number) { return this.http.get(${this.base}/${id}); }
+@Component
+public class FieldConfigurationMapper implements EntityMapper<FieldConfigurationDTO, FieldConfiguration> {
+    @Autowired private ListValueMapper listValueMapper;
+    @Autowired private RisqueValueListMapper risqueValueListMapper;
+
+
+
+    @Override
+    public FieldConfigurationDTO toDto(FieldConfiguration entity) {
+        if (entity == null) return null;
+
+        FieldConfigurationDTO dto = new FieldConfigurationDTO();
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setLibelle(entity.getLibelle());
+        dto.setType(entity.getType());
+        dto.setSelected(entity.isSelected());
+        String type = entity.getType();
+        dto.setFonction(entity.isFonction());
+        dto.setFonctionType(entity.getFonctionType());
+
+        if ("text".equalsIgnoreCase(type)) {
+            dto.setCustomBloc(entity.getCustomBloc());
+        } else if ("date".equalsIgnoreCase(type)) {
+            dto.setDateBloc(entity.getDateBloc());
+        } else if ("boolean".equalsIgnoreCase(type)) {
+            dto.setSelectBoolean(entity.isSelectBoolean());
+        } else if ("select".equalsIgnoreCase(type)) {
+        if (entity.getValueItemRisqueItem() != null && !entity.getValueItemRisqueItem().isEmpty()) {
+            List<ValueItemRisqueItemDto> valueItemRisqueItemDtos = new ArrayList<>();
+            for (ValueItemRisqueItem item : entity.getValueItemRisqueItem()) {
+                ValueItemRisqueItemDto dtoItem = new ValueItemRisqueItemDto();
+                dtoItem.setId(item.getId());
+                dtoItem.setValueItemId(item.getListValueItem().getId());
+                dtoItem.setRisqueValueItemId(item.getRisqueValueItem().getId());
+                valueItemRisqueItemDtos.add(dtoItem);
+            }
+            dto.setValueItemRisqueItemDto(valueItemRisqueItemDtos);
+        }
+
+
+        if (entity.getValueList() != null) {
+            dto.setValueId(entity.getValueList().getId());
+        }
+    }
+        if (entity.getAreas() != null && !entity.getAreas().isEmpty()) {
+            Set<Long> areaIds = entity.getAreas().stream()
+                    .map(Area::getId)
+                    .collect(Collectors.toSet());
+            dto.setAreasId(areaIds);
+        }
+
+        if (entity.getRisqueValueList() != null) {
+            dto.setRisqueValueId(entity.getRisqueValueList().getId());
+        }
+
+        return dto;
+    }
+
+
+
+    @Override
+    public FieldConfiguration toEntity(FieldConfigurationDTO dto) {
+        if (dto == null) return null;
+
+        FieldConfiguration entity = new FieldConfiguration();
+        entity.setId(dto.getId());
+        entity.setCode(dto.getCode());
+        entity.setLibelle(dto.getLibelle());
+        entity.setType(dto.getType());
+        entity.setSelected(dto.isSelected());
+        entity.setFonctionType(dto.getFonctionType());
+        entity.setFonction(dto.isFonction());
+
+        if (dto.getValueId() != null) {
+            ListValue valueStub = new ListValue();
+            valueStub.setId(dto.getValueId());
+            entity.setValueList(valueStub);
+        }
+
+        if (dto.getRisqueValueId() != null) {
+            RisqueValueList risqueStub = new RisqueValueList();
+            risqueStub.setId(dto.getRisqueValueId());
+            entity.setRisqueValueList(risqueStub);
+        }
+
+        if (dto.getAreasId() != null && !dto.getAreasId().isEmpty()) {
+            Set<com.sahambank.fccr.core.entities.Area> areaStubs = dto.getAreasId().stream().map(id -> {
+                Area area = new Area();
+                area.setId(id);
+                return area;
+            }).collect(Collectors.toSet());
+            entity.setAreas(areaStubs);
+        }
+        return entity;
+    }
+
+    public FieldConfiguration toEntityCreate(FieldConfigurationCreateDTO dto) {
+        if (dto == null) return null;
+
+        FieldConfiguration entity = new FieldConfiguration();
+        entity.setId(dto.getId());
+        entity.setCode(dto.getCode());
+        entity.setLibelle(dto.getLibelle());
+        entity.setType(dto.getType());
+        entity.setSelected(dto.isSelected());
+        entity.setSearchable(dto.isSearchable());
+        entity.setFonctionType(dto.getFonctionType());
+        entity.setFonction(dto.isFonction());
+
+        if (dto.getValueId() != null) {
+            ListValue valueStub = new ListValue();
+            valueStub.setId(dto.getValueId());
+            entity.setValueList(valueStub);
+        }
+
+        if (dto.getRisqueValueId() != null) {
+            RisqueValueList risqueStub = new RisqueValueList();
+            risqueStub.setId(dto.getRisqueValueId());
+            entity.setRisqueValueList(risqueStub);
+        }
+
+        String type = dto.getType();
+        if ("text".equalsIgnoreCase(type)) {
+            entity.setCustomBloc(dto.getCustomBloc());
+        } else if ("date".equalsIgnoreCase(type)) {
+            entity.setDateBloc(dto.getDateBloc());
+        } else if ("boolean".equalsIgnoreCase(type)) {
+            entity.setSelectBoolean(dto.isSelectBoolean());
+        }
+
+        return entity;
+    }
+
+    /*
+     public FieldConfigurationDTO toDto(FieldConfiguration entity) {
+        if (entity == null) return null;
+
+        FieldConfigurationDTO dto = new FieldConfigurationDTO();
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setLibelle(entity.getLibelle());
+        dto.setType(entity.getType());
+
+        // Conversion des Area en ID
+        if (entity.getAreas() != null && !entity.getAreas().isEmpty()) {
+            Set<Long> areaIds = entity.getAreas().stream()
+                    .map(Area::getId)
+                    .collect(Collectors.toSet());
+            dto.setAreasId(areaIds);
+        }
+
+        if (entity.getValueList() != null) {
+            dto.setValueId(entity.getValueList().getId());
+        }
+
+        if (entity.getRisqueValueList() != null) {
+            dto.setRisqueValueId(entity.getRisqueValueList().getId());
+        }
+
+        return dto;
+    }
+
+    @Override
+    public FieldConfiguration toEntity(FieldConfigurationDTO dto) {
+        if (dto == null) return null;
+
+        FieldConfiguration entity = new FieldConfiguration();
+        entity.setId(dto.getId());
+        entity.setCode(dto.getCode());
+        entity.setLibelle(dto.getLibelle());
+        entity.setType(dto.getType());
+
+        if (dto.getValueId() != null) {
+            ListValue valueStub = new ListValue();
+            valueStub.setId(dto.getValueId());
+            entity.setValueList(valueStub);
+        }
+
+        if (dto.getRisqueValueId() != null) {
+            RisqueValueList risqueStub = new RisqueValueList();
+            risqueStub.setId(dto.getRisqueValueId());
+            entity.setRisqueValueList(risqueStub);
+        }
+
+        // Conversion des areasId en objets Area (stub)
+        if (dto.getAreasId() != null && !dto.getAreasId().isEmpty()) {
+            Set<Area> areaStubs = dto.getAreasId().stream().map(id -> {
+                Area area = new Area();
+                area.setId(id);
+                return area;
+            }).collect(Collectors.toSet());
+            entity.setAreas(areaStubs);
+        }
+
+        return entity;
+    }
+    */
 }
 
-Fichier: src/app/components/notation-form/notation-form.component.ts (extrait submit)
-submit() {
-const payload = { segmentId: this.selectedSegmentId, items: [] as any[] };
-
-for (const area of this.segment.areas) {
-for (const fc of area.fieldConfigurations) {
-const ctrl = this.form.get('f_' + fc.id);
-if (fc.type === 'select') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'select',
-selectedValueItemIds: ctrl?.value || []
-});
-} else if (fc.type === 'boolean') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'boolean',
-value: ctrl?.value === true ? 'true' : 'false'
-});
-} else if (fc.type === 'date') {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'date',
-value: ctrl?.value ? new Date(ctrl.value).toISOString() : null
-});
-} else {
-payload.items.push({
-fieldConfigurationId: fc.id,
-type: 'text',
-value: ctrl?.value ?? ''
-});
-}
-}
-}
-
-this.notationService.create(payload).subscribe();
-}
