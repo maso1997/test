@@ -1524,3 +1524,565 @@ public class FieldConfigurationMapper implements EntityMapper<FieldConfiguration
     */
 }
 
+package com.sahambank.fccr.core.mapper;
+
+import com.sahambank.fccr.core.dto.FieldConfig.FieldConfigVueDto;
+import com.sahambank.fccr.core.dto.RisqueValue.RisqueValueItemVueDto;
+import com.sahambank.fccr.core.dto.ValueItemRisqueItemVueDto;
+import com.sahambank.fccr.core.dto.area.AreasVueDto;
+import com.sahambank.fccr.core.dto.listValue.ListValueItemVueDto;
+import com.sahambank.fccr.core.dto.searchSegments.*;
+import com.sahambank.fccr.core.dto.segment.SegmentCreateDTO;
+import com.sahambank.fccr.core.dto.segment.SegmentDtoVues;
+import com.sahambank.fccr.core.entities.*;
+import com.sahambank.fccr.core.entities.*;
+import com.sahambank.fccr.core.dto.segment.SegmentDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Component
+public class SegmentMapper implements EntityMapper<SegmentDTO, Segment> {
+
+    @Autowired
+    private AreaMapper areaMapper;
+    @Autowired
+    private FieldConfigurationMapper fieldConfigMapper;
+
+    @Autowired
+    private ListValueMapper listValueMapper;
+
+    @Autowired
+    private RisqueValueListMapper risqueValueListMapper;
+
+
+
+    @Override
+    public Segment toEntity(SegmentDTO dto) {
+        if (dto == null) return null;
+
+        Segment entity = new Segment();
+        entity.setId(dto.getId());
+        entity.setCode(dto.getCode());
+        entity.setLibelle(dto.getLibelle());
+
+        if (dto.getAreasId() != null && !dto.getAreasId().isEmpty()) {
+            List<Area> areas = dto.getAreasId().stream()
+                    .map(id -> {
+                        Area area = new Area();
+                        area.setId(id);
+                        return area;
+                    })
+                    .collect(Collectors.toList());
+            entity.setAreas(areas);
+        } else {
+            entity.setAreas(new ArrayList<>());
+        }
+
+        return entity;
+    }
+
+
+    public Segment toEntityCreate(SegmentCreateDTO dto) {
+        if (dto == null) return null;
+
+        Segment entity = new Segment();
+        entity.setCode(dto.getCode());
+        entity.setLibelle(dto.getLibelle());
+
+        return entity;
+    }
+
+    public SegmentCreateDTO toCreateDto(Segment segment) {
+
+        SegmentCreateDTO entity = new SegmentCreateDTO();
+        entity.setCode(segment.getCode());
+        entity.setLibelle(segment.getLibelle());
+
+        return entity;
+    }
+
+
+    @Override
+    public SegmentDTO toDto(Segment entity) {
+        if (entity == null) return null;
+
+        SegmentDTO dto = new SegmentDTO();
+        dto.setId(entity.getId());
+        dto.setCode(entity.getCode());
+        dto.setLibelle(entity.getLibelle());
+        if (entity.getAreas() != null && !entity.getAreas().isEmpty()) {
+            List<Long> areaIds = entity.getAreas().stream()
+                    .map(Area::getId)
+                    .collect(Collectors.toList());
+            dto.setAreasId(areaIds);
+        } else {
+            dto.setAreasId(Collections.emptyList());
+        }
+
+        return dto;
+    }
+
+    public SegmentDtoVues toDtoVue(Segment segment) {
+        SegmentDtoVues dto = new SegmentDtoVues();
+        dto.setId(segment.getId());
+        dto.setCode(segment.getCode());
+        dto.setLibelle(segment.getLibelle());
+
+        List<AreasVueDto> areasDtoList = new ArrayList<>();
+        for (Area area : segment.getAreas()) {
+            AreasVueDto areaDto = new AreasVueDto();
+            areaDto.setId(area.getId());
+            areaDto.setCode(area.getCode());
+            areaDto.setLibelle(area.getLibelle());
+
+            List<FieldConfigVueDto> fieldDtos = new ArrayList<>();
+            for (FieldConfiguration config : area.getFieldConfigurations()) {
+                FieldConfigVueDto fieldDto = new FieldConfigVueDto();
+                fieldDto.setId(config.getId());
+                fieldDto.setCode(config.getCode());
+                fieldDto.setLibelle(config.getLibelle());
+                fieldDto.setType(config.getType());
+                fieldDto.setExpression(config.getExpression());
+                fieldDto.setSelected(config.isSelected());
+                if(config.getRisqueValueList().getId()!= null){
+                    fieldDto.setRisqueValueId(config.getRisqueValueList().getId());
+
+                }else{
+                    fieldDto.setRisqueValueId(null);
+
+                }
+                fieldDto.setSearchable(config.isSearchable());
+
+                List<ValueItemRisqueItemVueDto> risqueDtos = new ArrayList<>();
+                if (config.getValueItemRisqueItem() != null) {
+                    for (ValueItemRisqueItem item : config.getValueItemRisqueItem()) {
+                        ValueItemRisqueItemVueDto itemDto = new ValueItemRisqueItemVueDto();
+                        itemDto.setId(item.getId());
+
+                        if (item.getListValueItem() != null) {
+                            ListValueItemVueDto listValueDto = new ListValueItemVueDto();
+                            listValueDto.setId(item.getListValueItem().getId());
+                            listValueDto.setCode(item.getListValueItem().getCode());
+                            listValueDto.setLibelle(item.getListValueItem().getLibelle());
+                            itemDto.setListValueItem(listValueDto);
+                        }
+
+                        if (item.getRisqueValueItem() != null) {
+                            RisqueValueItem risqueEntity = item.getRisqueValueItem();
+
+                            RisqueValueItemVueDto risqueItemDto = new RisqueValueItemVueDto();
+                            risqueItemDto.setId(risqueEntity.getId());
+                            risqueItemDto.setCode(risqueEntity.getCode());
+                            risqueItemDto.setLibelle(risqueEntity.getLibelle());
+
+                            // Poids : liste de RisqueItemWeightDto
+                            List<RisqueItemWeightDto> poidsDtos = new ArrayList<>();
+                            if (risqueEntity.getWeights() != null) {
+                                for (RisqueItemWeight poids : risqueEntity.getWeights()) {
+                                    RisqueItemWeightDto poidsDto = new RisqueItemWeightDto();
+                                    poidsDto.setId(poids.getId());
+                                    poidsDto.setWeightL(poids.getWeightL());
+                                    poidsDto.setWeightMl(poids.getWeightMl());
+                                    poidsDto.setWeightMh(poids.getWeightMh());
+                                    poidsDto.setAreaId(poids.getArea() != null ? poids.getArea().getId() : null);
+                                    poidsDto.setFieldConfigDtoId(poids.getFieldConfiguration() != null ? poids.getFieldConfiguration().getId() : null);
+                                    poidsDto.setRisqueValueItemDtoId(risqueEntity.getId());
+
+                                    poidsDtos.add(poidsDto);
+                                }
+                            }
+                            risqueItemDto.setWeights(poidsDtos);
+                            itemDto.setRisqueValueItem(risqueItemDto);
+                        }
+
+                        risqueDtos.add(itemDto);
+                        fieldDto.setRisqueValueList(risqueDtos);
+
+                    }
+                }
+
+                fieldDtos.add(fieldDto);
+            }
+
+            areaDto.setFieldConfigurations(fieldDtos);
+            areasDtoList.add(areaDto);
+        }
+
+        dto.setAreas(areasDtoList);
+        return dto;
+    }
+
+
+//    public SegmentDtoVues toDtoVue(Segment segment) {
+//        SegmentDtoVues dto = new SegmentDtoVues();
+//        dto.setId(segment.getId());
+//        dto.setCode(segment.getCode());
+//        dto.setLibelle(segment.getLibelle());
+//
+//        List<AreasVueDto> areasDtoList = new ArrayList<>();
+//        for (Area area : segment.getAreas()) {
+//            AreasVueDto areaDto = new AreasVueDto();
+//            areaDto.setId(area.getId());
+//            areaDto.setCode(area.getCode());
+//            areaDto.setLibelle(area.getLibelle());
+//
+//            List<FieldConfigVueDto> fieldDtos = new ArrayList<>();
+//            for (FieldConfiguration config : area.getFieldConfigurations()) {
+//                FieldConfigVueDto fieldDto = new FieldConfigVueDto();
+//
+//                // remplit les champs communs
+//                fieldDto.setId(config.getId());
+//                fieldDto.setCode(config.getCode());
+//                fieldDto.setLibelle(config.getLibelle());
+//                fieldDto.setType(config.getType());
+//                fieldDto.setExpression(config.getExpression());
+//                fieldDto.setSelected(config.isSelected());
+//                fieldDto.setSearchable(config.isSearchable());
+//                fieldDto.setCustomBloc(config.getCustomBloc());
+//                fieldDto.setDateBloc(config.getDateBloc());
+//                fieldDto.setSelectBoolean(config.isSelectBoolean());
+//
+//                // si la FieldConfiguration référence une RiskValueList, on stocke son ID
+//                if (config.getRisqueValueList() != null) {
+//                    fieldDto.setRisqueValueId(config.getRisqueValueList().getId());
+//                }
+//
+//                // construit systématiquement la liste des ValueItemRisqueItemVueDto
+//                List<ValueItemRisqueItemVueDto> risqueDtos = new ArrayList<>();
+//                if (config.getValueItemRisqueItem() != null) {
+//                    for (ValueItemRisqueItem item : config.getValueItemRisqueItem()) {
+//                        ValueItemRisqueItemVueDto itemDto = new ValueItemRisqueItemVueDto();
+//                        itemDto.setId(item.getId());
+//
+//                        // mappe ListValueItem
+//                        if (item.getListValueItem() != null) {
+//                            ListValueItemVueDto lv = new ListValueItemVueDto();
+//                            lv.setId(item.getListValueItem().getId());
+//                            lv.setCode(item.getListValueItem().getCode());
+//                            lv.setLibelle(item.getListValueItem().getLibelle());
+//                            itemDto.setListValueItem(lv);
+//                        }
+//
+//                        // mappe RisqueValueItem + poids s’il existe
+//                        if (item.getRisqueValueItem() != null) {
+//                            RisqueValueItemVueDto rv = new RisqueValueItemVueDto();
+//                            rv.setId(item.getRisqueValueItem().getId());
+//                            rv.setCode(item.getRisqueValueItem().getCode());
+//                            rv.setLibelle(item.getRisqueValueItem().getLibelle());
+//
+//                            if (item.getRisqueValueItem().getWeight() != null) {
+//                                RisqueItemWeightDto w = new RisqueItemWeightDto();
+//                                w.setId(item.getRisqueValueItem().getWeight().getId());
+//                                w.setWeightL(item.getRisqueValueItem().getWeight().getWeightL());
+//                                w.setWeightMl(item.getRisqueValueItem().getWeight().getWeightMl());
+//                                w.setWeightMh(item.getRisqueValueItem().getWeight().getWeightMh());
+//                                rv.setWeight(w);
+//                            }
+//
+//                            itemDto.setRisqueValueItem(rv);
+//                        }
+//
+//                        risqueDtos.add(itemDto);
+//                    }
+//                }
+//                fieldDto.setRisqueValueList(risqueDtos);
+//
+//                fieldDtos.add(fieldDto);
+//            }
+//
+//            areaDto.setFieldConfigurations(fieldDtos);
+//            areasDtoList.add(areaDto);
+//        }
+//
+//        dto.setAreas(areasDtoList);
+//        return dto;
+//    }
+
+
+
+
+    public SegmentsDto toSearchDto(Segment segment) {
+        SegmentsDto dto = new SegmentsDto();
+        dto.setId(segment.getId());
+        dto.setCode(segment.getCode());
+        dto.setLibelle(segment.getLibelle());
+
+        List<AreasDto> areaDTOs = segment.getAreas().stream().map(area -> {
+            AreasDto areaDto = new AreasDto();
+            areaDto.setId(area.getId());
+            areaDto.setCode(area.getCode());
+            areaDto.setLibelle(area.getLibelle());
+
+            List<FieldConfigDto> fieldDTOs = area.getFieldConfigurations().stream().filter(FieldConfiguration::isSelected).map(field -> {
+                FieldConfigDto fieldDto = new FieldConfigDto();
+                fieldDto.setId(field.getId());
+                fieldDto.setCode(field.getCode());
+                fieldDto.setLibelle(field.getLibelle());
+                fieldDto.setType(field.getType());
+                fieldDto.setExpression(field.getExpression());
+                fieldDto.setSelected(field.isSelected());
+                fieldDto.setSearchable(field.isSearchable());
+                if(field.getType().equals("text")|| field.getType().equals("number")){
+                    fieldDto.setCustomBloc(field.getCustomBloc());
+                }else if(field.getType().equals("date")){
+                    fieldDto.setDateBloc(field.getDateBloc());
+                }
+
+                if (field.getValueList() != null) {
+                    ListValuesDto valueDto = new ListValuesDto();
+                    valueDto.setId(field.getValueList().getId());
+                    valueDto.setCode(field.getValueList().getCode());
+                    valueDto.setLibelle(field.getValueList().getLibelle());
+
+                    List<ListValueItemDto> items = field.getValueList().getItems().stream().map(item -> {
+                        ListValueItemDto itemDto = new ListValueItemDto();
+                        itemDto.setId(item.getId());
+                        itemDto.setCode(item.getCode());
+                        itemDto.setLibelle(item.getLibelle());
+
+                        List<ValueItemRisqueItemDto> assocDtos = item.getAssociations().stream().map(assoc -> {
+                            ValueItemRisqueItemDto assocDto = new ValueItemRisqueItemDto();
+                            assocDto.setId(assoc.getId());
+
+                            RisqueValueItem risqueItem = assoc.getRisqueValueItem();
+                            RisqueValueItemDto risqueDto = new RisqueValueItemDto();
+                            risqueDto.setId(risqueItem.getId());
+                            risqueDto.setCode(risqueItem.getCode());
+                            risqueDto.setLibelle(risqueItem.getLibelle());
+
+                            assocDto.setRisqueValueItem(risqueDto);
+                            return assocDto;
+                        }).collect(Collectors.toList());
+
+                        itemDto.setAssociations(assocDtos);
+                        return itemDto;
+                    }).collect(Collectors.toList());
+
+                    valueDto.setItems(items);
+                    fieldDto.setValueList(valueDto);
+                }
+
+                if (field.getRisqueValueList() != null) {
+                    RisqueValueListDto risqueDto = new RisqueValueListDto();
+                    risqueDto.setId(field.getRisqueValueList().getId());
+                    risqueDto.setCode(field.getRisqueValueList().getCode());
+                    risqueDto.setLibelle(field.getRisqueValueList().getLibelle());
+
+                    List<RisqueValueItemDto> items = field.getRisqueValueList().getItems().stream().map(item -> {
+                        RisqueValueItemDto itemDto = new RisqueValueItemDto();
+                        itemDto.setId(item.getId());
+                        itemDto.setCode(item.getCode());
+                        itemDto.setLibelle(item.getLibelle());
+
+                        // Associations
+                        List<ValueItemRisqueItemDto> assocDtos = item.getAssociations().stream().map(assoc -> {
+                            ValueItemRisqueItemDto assocDto = new ValueItemRisqueItemDto();
+                            assocDto.setId(assoc.getId());
+
+                            ListValueItem listItem = assoc.getListValueItem();
+                            ListValueItemDto listDto = new ListValueItemDto();
+                            listDto.setId(listItem.getId());
+                            listDto.setCode(listItem.getCode());
+                            listDto.setLibelle(listItem.getLibelle());
+
+                            assocDto.setListValueItem(listDto);
+                            return assocDto;
+                        }).collect(Collectors.toList());
+                        itemDto.setAssociations(assocDtos);
+//                        List<RisqueItemWeightDto> weightDtos = Optional.ofNullable(item.getWeights())
+//                                .orElse(Collections.emptyList()) // évite NullPointerException
+//                                .stream()
+//                                .map(weight -> {
+//                                    RisqueItemWeightDto weightDto = new RisqueItemWeightDto();
+//                                    weightDto.setId(weight.getId());
+//                                    weightDto.setWeightL(weight.getWeightL());
+//                                    weightDto.setWeightMl(weight.getWeightMl());
+//                                    weightDto.setWeightMh(weight.getWeightMh());
+//                                    weightDto.setAreaId(weight.getArea() != null ? weight.getArea().getId() : null);
+//                                    weightDto.setFieldConfigDtoId(weight.getFieldConfiguration() != null ? weight.getFieldConfiguration().getId() : null);
+//                                    weightDto.setRisqueValueItemDtoId(item.getId());
+//                                    return weightDto;
+//                                }).collect(Collectors.toList());
+//
+//                        itemDto.setWeights(weightDtos);
+                        List<RisqueItemWeightDto> weightDtos = Optional.ofNullable(item.getWeights())
+                                .orElse(Collections.emptyList())
+                                .stream()
+                                .filter(weight ->
+                                        weight.getArea() != null &&
+                                                weight.getFieldConfiguration() != null &&
+                                                weight.getArea().getId().equals(area.getId()) &&
+                                                weight.getFieldConfiguration().getId().equals(field.getId())
+                                )
+                                .map(weight -> {
+                                    RisqueItemWeightDto weightDto = new RisqueItemWeightDto();
+                                    weightDto.setId(weight.getId());
+                                    weightDto.setWeightL(weight.getWeightL());
+                                    weightDto.setWeightMl(weight.getWeightMl());
+                                    weightDto.setWeightMh(weight.getWeightMh());
+                                    weightDto.setAreaId(weight.getArea().getId());
+                                    weightDto.setFieldConfigDtoId(weight.getFieldConfiguration().getId());
+                                    weightDto.setRisqueValueItemDtoId(item.getId());
+                                    return weightDto;
+                                })
+                                .collect(Collectors.toList());
+
+                        itemDto.setWeights(weightDtos);
+
+
+                        return itemDto;
+                    }).collect(Collectors.toList());
+
+                    risqueDto.setItems(items);
+                    fieldDto.setRisqueValueList(risqueDto);
+                }
+
+                return fieldDto;
+            }).collect(Collectors.toList());
+
+            areaDto.setFieldConfigurations(fieldDTOs);
+            return areaDto;
+        }).collect(Collectors.toList());
+
+        dto.setAreas(areaDTOs);
+        return dto;
+    }
+
+
+
+
+}
+public class SegmentDtoVues {
+    private Long id;
+    private String code;
+    private String libelle;
+    private List<AreasVueDto> areas;
+public class AreasVueDto {
+    private Long id;
+    private String code;
+    private String libelle;
+    private List<FieldConfigVueDto> fieldConfigurations;
+public class FieldConfigVueDto {
+    private Long id;
+    private String code;
+    private String libelle;
+    private String type;
+    private String expression;
+    private List<ValueItemRisqueItemVueDto> risqueValueList;
+    private boolean selected;
+    private String customBloc;
+    private Long risqueValueId;
+    private boolean searchable;
+    private LocalDate dateBloc;
+    private boolean selectBoolean;
+public class ValueItemRisqueItemVueDto {
+    private Long id;
+    private ListValueItemVueDto listValueItem;
+    private RisqueValueItemVueDto risqueValueItem;
+
+
+
+
+
+
+
+
+
+
+
+
+package com.sahambank.fccr.core.service.Impl;
+
+import com.sahambank.fccr.core.dto.searchSegments.SegmentsDto;
+import com.sahambank.fccr.core.dto.segment.SegmentCreateDTO;
+import com.sahambank.fccr.core.dto.segment.SegmentDTO;
+import com.sahambank.fccr.core.dto.segment.SegmentDtoVues;
+import com.sahambank.fccr.core.entities.Area;
+import com.sahambank.fccr.core.entities.Segment;
+import com.sahambank.fccr.core.exception.ResourceNotFoundException;
+import com.sahambank.fccr.core.mapper.SegmentMapper;
+import com.sahambank.fccr.core.repository.AreaRepository;
+import com.sahambank.fccr.core.repository.SegmentRepository;
+import com.sahambank.fccr.core.service.ISegmentService;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+@Service
+public class SegmentServiceImpl implements ISegmentService {
+
+    private final SegmentRepository segmentRepository;
+    private final AreaRepository areaRepository;
+    private final SegmentMapper segmentMapper;
+
+    public SegmentServiceImpl(SegmentRepository segmentRepository, AreaRepository areaRepository, SegmentMapper segmentMapper) {
+        this.segmentRepository = segmentRepository;
+        this.areaRepository = areaRepository;
+        this.segmentMapper = segmentMapper;
+    }
+
+
+    public List<SegmentDTO> findAll() {
+        return segmentRepository.findAll().stream()
+                .map(segmentMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    public SegmentDtoVues findById(Long id) {
+        Segment segment = segmentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Segment introuvable pour id=" + id));
+        return segmentMapper.toDtoVue(segment);
+    }
+
+    public SegmentCreateDTO create(SegmentCreateDTO dto) {
+        Optional<Segment>segment = segmentRepository.findByCode(dto.getCode());
+        if(segment.isPresent()){
+            throw new ResourceNotFoundException("rrr");
+        }
+        return segmentMapper.toCreateDto(segmentRepository.save(segmentMapper.toEntityCreate(dto)));
+    }
+
+    public SegmentCreateDTO update(Long id, SegmentCreateDTO dto) {
+        Segment existing = segmentRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Segment introuvable pour id=" + id));
+        existing.setCode(dto.getCode());
+        existing.setLibelle(dto.getLibelle());
+        Segment updated = segmentRepository.save(existing);
+        return segmentMapper.toCreateDto(updated);
+    }
+
+    public void delete(Long id) {
+        if (!segmentRepository.existsById(id)) {
+            throw new RuntimeException("Impossible de supprimer : Segment introuvable pour id=" + id);
+        }
+        segmentRepository.deleteById(id);
+    }
+
+    private Segment getSegmentArea(SegmentDTO segmentDTO , Segment segment){
+
+        List<Area>areas = new ArrayList<>();
+        segmentDTO.getAreasId().forEach(areaId -> {
+            Optional<Area> area = areaRepository.findById(areaId);
+            if(area.isPresent()){
+                areas.add(area.get());
+            }else {
+                throw  new ResourceNotFoundException("this area does not exist");
+            }
+
+        });
+        segment.setAreas(areas);
+        return segment;
+    }
+    @Override
+    public List<SegmentsDto> searchAll() {
+        return segmentRepository.findAll().stream()
+                .map(segmentMapper::toSearchDto)
+                .collect(Collectors.toList());
+    }
+}
