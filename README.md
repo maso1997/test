@@ -1027,3 +1027,299 @@ public class ProductImportStrategy implements FileImportStrategy {
 
 
 }
+<nb-card accent="primary">
+  <nb-card-header class="d-flex flex-row justify-content-between align-items-center">
+ <h5 class="title-animation title-heading text-uppercase my-auto p-2"> 
+      Notation
+    </h5>
+    
+  </nb-card-header>
+  <form [formGroup]="fieldForm" (ngSubmit)="submit()">
+    <nb-card-body>
+      <nb-form-field fullWidth>
+        <nb-select fullWidth formControlName="segment" placeholder="Sélectionner un segment"
+          [class.invalid]="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched"
+          (selectedChange)="onSegementChange($event)">
+          <nb-option *ngFor="let type of referentiels$" [value]="type.id">
+            {{ type.libelle }}
+          </nb-option>
+        </nb-select>
+      </nb-form-field>
+      <small class="error" *ngIf="fieldForm.get('segment')?.invalid && fieldForm.get('segment')?.touched">
+        Ce champ est requis.
+      </small>
+    </nb-card-body>
+<div style="display: flex; align-items: center; ">
+  <label style="min-width: 200px; margin: 20px;"> <strong> code client </strong> </label>
+  <nb-form-field fullWidth style="flex: 1;">
+    <input nbInput fullWidth formControlName="clientCode" placeholder=" Saisie Code client" />
+  </nb-form-field>
+</div>
+<small class="error" *ngIf="fieldForm.get('clientCode')?.invalid && fieldForm.get('clientCode')?.touched">
+  Ce champ est requis.
+</small>
+
+
+    <ng-container *ngFor="let area of segement.areas">
+      <nb-card class="area-card">
+        <nb-card-header accent="danger" class="areatit">
+          <nb-icon icon="map-outline" pack="eva"></nb-icon>
+          <strong>{{ area.libelle }}</strong>
+        </nb-card-header>
+        <nb-card-body>
+          <div *ngFor="let config of area.fieldConfigurations" class="field-row">
+            <div class="field-label">
+              <strong>{{ config.libelle }}</strong>
+            </div>
+            <ng-container [ngSwitch]="config.type">
+              <!-- TEXT -->
+              <nb-form-field fullWidth *ngSwitchCase="'text'">
+                <input nbInput fullWidth [formControlName]="'field_' + config.id" placeholder="Saisir texte" />
+              </nb-form-field>
+              <!-- DATE -->
+              <ng-container *ngIf="true">
+                <nb-form-field fullWidth *ngSwitchCase="'date'">
+                  <input nbInput fullWidth placeholder="Sélectionner une date" [formControlName]="'field_' + config.id"
+                    [nbDatepicker]="picker" />
+                  <nb-datepicker #picker format="dd/MM/yyyy"></nb-datepicker>
+                </nb-form-field>
+              </ng-container>
+              <!-- SELECT -->
+              <nb-form-field fullWidth *ngSwitchCase="'select'">
+                <nb-select fullWidth [formControlName]="'field_' + config.id" placeholder="Sélectionner…" multiple>
+                  <nb-option *ngFor="let opt of config.risqueValueList" [value]="opt.risqueValueItem.id">
+                    {{ opt.listValueItem.libelle }}
+                  </nb-option>
+                </nb-select>
+              </nb-form-field>
+
+              <!-- BOOLEAN -->
+              <nb-form-field fullWidth *ngSwitchCase="'boolean'">
+                <nb-select fullWidth [formControlName]="'field_' + config.id">
+                  <nb-option [value]="true">Oui</nb-option>
+                  <nb-option [value]="false">Non</nb-option>
+                </nb-select>
+              </nb-form-field>
+            </ng-container>
+          </div>
+        </nb-card-body>
+      </nb-card>
+    </ng-container>
+    <nb-card class="">
+      <nb-card-body class="actions">
+        <button nbButton status="primary" type="submit">
+          <nb-icon icon="checkmark-outline"></nb-icon>
+          Valider
+        </button>
+
+      </nb-card-body>
+    </nb-card>
+
+
+
+  </form>
+</nb-card>
+<!-- <pre>{{ fieldForm.value | json }}</pre> -->
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { NbToastrService, NbGlobalPhysicalPosition } from '@nebular/theme';
+import { GestionReferentielsService } from '../../gestion-referentiel/services/gestion-referentiels.service';
+import { Referentiel } from 'src/app/core/models/Referentiel';
+import { ReferentielTypes } from '../../traitement-demande/model/fieldConfig';
+import { NotationService } from '../notation.service';
+import { SegmentDtoVues } from '../model/segementDtoVue';
+import { FiledValueDto, NotationDto, SegmentSaveDTO } from '../model/NotationsDto';
+
+@Component({
+  standalone: false,
+  selector: 'app-add-notation',
+  templateUrl: './add-notation.component.html',
+  styleUrls: ['./add-notation.component.scss'],
+})
+export class AddNotationComponent implements OnInit {
+  fieldForm!: FormGroup;
+  selectedRef = 'segments';
+  referentiels$!: Referentiel[];
+  referentielTypes: ReferentielTypes[] = [];
+  segement: SegmentDtoVues = {} as SegmentDtoVues;
+
+  constructor(
+    private fb: FormBuilder,
+    private toasterService: NbToastrService,
+    private serviceRef: GestionReferentielsService,
+    private notationService: NotationService
+  ) {
+    this.referentielTypes = [
+      { value: 'segments', label: 'Segment', hasExpression: false },
+      { value: 'areas', label: 'Area', hasExpression: false },
+      { value: 'listValues', label: 'List Value', hasExpression: true },
+      { value: 'listValueItems', label: 'List Value Item', hasExpression: false },
+      { value: 'risqueValueLists', label: 'Risque Value', hasExpression: false },
+      { value: 'risqueValueItems', label: 'Risque Value Item', hasExpression: false },
+    ];
+
+    this.fieldForm = this.fb.group({
+      segment: ['', Validators.required],
+      clientCode: ['', Validators.required],
+    });
+  }
+
+  ngOnInit(): void {
+    this.serviceRef.getReferentiel(this.selectedRef).subscribe((data) => {
+      this.referentiels$ = data;
+    });
+  }
+
+  onSegementChange(event: any) {
+    const selectedId = event?.id || event;
+    const clientCodeValue = this.fieldForm.get('clientCode')?.value || '';
+
+    this.notationService.getSegmentById(selectedId).subscribe({
+      next: (response) => {
+        this.segement = response;
+        console.log('Segment chargé ', this.segement);
+
+        this.fieldForm = this.fb.group({
+          segment: [selectedId, Validators.required],
+          clientCode: [clientCodeValue, Validators.required],
+        });
+
+        for (const area of this.segement.areas) {
+          for (const config of area.fieldConfigurations) {
+            const controlName = `field_${config.id}`;
+            let initialValue: any;
+            switch (config.type) {
+              case 'select':
+                initialValue = [];
+                break;
+              case 'boolean':
+              case 'date':
+                initialValue = null;
+                break;
+              default:
+                initialValue = '';
+            }
+            this.fieldForm.addControl(
+              controlName,
+              this.fb.control(initialValue, Validators.required)
+            );
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération du segment :', err);
+      },
+    });
+  }
+
+  submit(): void {
+    if (this.fieldForm.invalid) {
+      this.toasterService.danger(
+        'Veuillez remplir tous les champs obligatoires.',
+        'Formulaire incomplet',
+        {
+          status: 'danger',
+          duration: 4000,
+          destroyByClick: true,
+          position: NbGlobalPhysicalPosition.TOP_RIGHT,
+          preventDuplicates: true,
+        }
+      );
+      this.fieldForm.markAllAsTouched();
+      return;
+    }
+
+    const formValues = this.fieldForm.value;
+
+    const segmentSave: SegmentSaveDTO = {
+      id: this.segement.id,
+      code: this.segement.code,
+      libelle: this.segement.libelle,
+    };
+
+    const payload: NotationDto = {
+      SEGMENT: segmentSave,
+      fieldConfigurations: [],
+      clientCode: formValues.clientCode, 
+    };
+
+    for (const area of this.segement.areas) {
+      for (const config of area.fieldConfigurations) {
+        const controlName = `field_${config.id}`;
+        const value = formValues[controlName];
+
+        const fieldDto: FiledValueDto = {
+          id: config.id,
+          code: config.code,
+          fonction: config.fonction,
+          fonctionType: config.fonctionType,
+          risqueValueList: [],
+        };
+
+        // SELECT MULTIPLE
+        if (config.type === 'select' && Array.isArray(value)) {
+          for (const selectedId of value) {
+            const entry = config.risqueValueList.find(
+              (r) => r.risqueValueItem.id === selectedId
+            );
+            if (entry) {
+              fieldDto.risqueValueList.push({
+                listValueItem: entry.listValueItem,
+                risqueValueItem: entry.risqueValueItem,
+              });
+            }
+          }
+        }
+
+        
+        // BOOLEAN, TEXT, DATE
+        else if (value !== null && value !== undefined && value !== '') {
+          fieldDto.risqueValueList.push({
+            risqueValueItem: {
+              code: String(value),
+              libelle: String(value),
+            },
+          });
+        }
+
+        payload.fieldConfigurations.push(fieldDto);
+      }
+    }
+
+    console.log('Payload envoyé au back ', payload);
+
+    this.notationService.saveNotation(payload).subscribe({
+      next: () => {
+        this.toasterService.success('Notation ajoutée avec succès ', 'Succès', {
+          status: 'success',
+          duration: 3000,
+          destroyByClick: true,
+          position: NbGlobalPhysicalPosition.TOP_RIGHT,
+          preventDuplicates: true,
+        });
+        this.fieldForm.reset();
+      },
+      error: (err) => {
+        console.error("Erreur lors de l'envoi de la notation :", err);
+        this.toasterService.danger("Échec de l'ajout de la notation ", 'Erreur', {
+          status: 'danger',
+          duration: 3000,
+          destroyByClick: true,
+          position: NbGlobalPhysicalPosition.TOP_RIGHT,
+          preventDuplicates: true,
+        });
+      },
+    });
+  }
+}
+39	"aaa"	"aaa"
+40	"Tiers lié à Client"	"Tiers lié à Client"
+41	"HIGH"	"HIGH"
+42	"Masculin"	"Masculin"
+43	"wws"	"wws"
+44	"Thu Aug 14 2025 00:00:00 GMT+0100 (UTC+01:00)"	"Thu Aug 14 2025 00:00:00 GMT+0100 (UTC+01:00)"
+45	"aaa"	"aaa"
+46	"Tiers lié à Client"	"Tiers lié à Client"
+47	"HIGH"	"HIGH"
+48	"Masculin"	"Masculin"
+
