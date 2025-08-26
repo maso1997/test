@@ -1312,14 +1312,238 @@ export class AddNotationComponent implements OnInit {
     });
   }
 }
-39	"aaa"	"aaa"
-40	"Tiers lié à Client"	"Tiers lié à Client"
-41	"HIGH"	"HIGH"
-42	"Masculin"	"Masculin"
-43	"wws"	"wws"
-44	"Thu Aug 14 2025 00:00:00 GMT+0100 (UTC+01:00)"	"Thu Aug 14 2025 00:00:00 GMT+0100 (UTC+01:00)"
-45	"aaa"	"aaa"
-46	"Tiers lié à Client"	"Tiers lié à Client"
-47	"HIGH"	"HIGH"
-48	"Masculin"	"Masculin"
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////:::
+///////////////////////////////////
+@Service
+public class NotationServiceImpl implements NotationService {
+
+    private final NotationRepository notationRepository;
+    private final ItemRepository itemRepository;
+    private final ProductDataRepository productDataRepository;
+    private final RisqueEntryRepository risqueEntryRepository;
+    private final RisqueEntryMapper risqueEntryMapper;
+
+    public NotationServiceImpl(NotationRepository notationRepository,
+                               ItemRepository itemRepository,
+                               ProductDataRepository productDataRepository,
+                               RisqueEntryRepository risqueEntryRepository,
+                               RisqueEntryMapper risqueEntryMapper) {
+        this.notationRepository = notationRepository;
+        this.itemRepository = itemRepository;
+        this.productDataRepository = productDataRepository;
+        this.risqueEntryRepository = risqueEntryRepository;
+        this.risqueEntryMapper = risqueEntryMapper;
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    // Ne jette plus d’exception : renvoie Optional pour permettre le fallback
+    private Optional<ProductData> resolveOptionalProductData(String clientCode) {
+        String currentMonth = YearMonth.now().toString(); // YYYY-MM
+        return productDataRepository
+                .findByRctIdentifierClientAndCollectMonth(clientCode, currentMonth)
+                .or(() -> productDataRepository.findTopByRctIdentifierClientOrderByCollectMonthDesc(clientCode));
+    }
+
+    // Charge l’historique ProductData sur 12 mois (si disponible), puis récupère les risques liés au client
+    // et mappe en DTO. On garde ça simple côté requêtes.
+    private List<RisqueEntryDto> loadBackendRiskDtosForClientLast12Months(String clientCode) {
+        String sinceMonth = YearMonth.now().minusMonths(11).toString();
+        List<ProductData> historiques = productDataRepository.findAllSinceMonth(clientCode, sinceMonth);
+        if (historiques == null || historiques.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // La requête findFirstByRctIdentifierClient renvoie les risques du client (nom mal choisi)
+        // On les mappe une seule fois pour éviter les doublons par itérations.
+        List<RisqueEntry> risques = risqueEntryRepository.findFirstByRctIdentifierClient(clientCode);
+        if (risques == null || risques.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return risques.stream()
+                .map(risqueEntryMapper::fromRisqueEntryToDTO)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    // Clé de dédoublonnage
+    private String keyOf(RisqueEntryDto r) {
+        String listCode = (r.getListValueItem() != null && r.getListValueItem().getCode() != null)
+                ? r.getListValueItem().getCode() : "";
+        String riskCode = (r.getRisqueValueItem() != null && r.getRisqueValueItem().getCode() != null)
+                ? r.getRisqueValueItem().getCode() : "";
+        return listCode + "|" + riskCode;
+    }
+
+    // Fusion sans doublons. Priorité "back" (données produit) par défaut, puis "front".
+    private List<RisqueEntryDto> mergeFrontBackDistinct(List<RisqueEntryDto> front, List<RisqueEntryDto> back) {
+        Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+        if (back != null) {
+            for (RisqueEntryDto r : back) {
+                if (r != null) unique.put(keyOf(r), r);
+            }
+        }
+        if (front != null) {
+            for (RisqueEntryDto r : front) {
+                if (r != null) unique.putIfAbsent(keyOf(r), r);
+            }
+        }
+        return new ArrayList<>(unique.values());
+    }
+
+    // Transforme les DTOs en entités RisqueEntry et relie au fieldValue
+    private List<RisqueEntry> mapToEntities(List<RisqueEntryDto> dtos, NotationFieldValue fv) {
+        if (dtos == null) return Collections.emptyList();
+        return dtos.stream().map(r -> {
+            RisqueEntry emb = new RisqueEntry();
+            if (r.getListValueItem() != null && !isBlank(r.getListValueItem().getCode())) {
+                emb.setListValueItem(resolveItemByCodeOrCreate(r.getListValueItem().getCode(), r.getListValueItem().getLibelle()));
+            }
+            if (r.getRisqueValueItem() != null && !isBlank(r.getRisqueValueItem().getCode())) {
+                emb.setRisqueValueItem(resolveItemByCodeOrCreate(r.getRisqueValueItem().getCode(), r.getRisqueValueItem().getLibelle()));
+            }
+            emb.setNotationFieldValue(fv);
+            return emb;
+        }).collect(Collectors.toList());
+    }
+
+    private Item resolveItemByCodeOrCreate(String code, String libelle) {
+        return itemRepository.findByCode(code).orElseGet(() -> {
+            Item item = new Item();
+            item.setCode(code);
+            item.setLibelle(libelle);
+            return itemRepository.save(item);
+        });
+    }
+
+    @Transactional
+    @Override
+    public Long save(NotationDto dto) {
+        if (dto == null) throw new IllegalArgumentException("NotationDto is required");
+        if (dto.getSEGMENT() == null || isBlank(dto.getSEGMENT().getCode()))
+            throw new IllegalArgumentException("SEGMENT and SEGMENT.code are required");
+        if (isBlank(dto.getClientCode()))
+            throw new IllegalArgumentException("clientCode is required");
+
+        // On n’échoue plus si ProductData absent
+        Optional<ProductData> productDataOpt = resolveOptionalProductData(dto.getClientCode());
+
+        Notation notation = new Notation();
+        notation.setSegmentCode(dto.getSEGMENT().getCode());
+        notation.setClientCode(dto.getClientCode());
+        notation.setProductData(productDataOpt.orElse(null)); // rattache si disponible, sinon null
+
+        List<NotationFieldValue> fieldValues = new ArrayList<>();
+
+        if (dto.getFieldConfigurations() != null) {
+            // Pré-chargement des risques back (réutilisé pour tous les champs "Produit")
+            List<RisqueEntryDto> backendDtosCache = null;
+
+            for (FiledValueDto f : dto.getFieldConfigurations()) {
+                if (f == null) continue;
+
+                NotationFieldValue fv = new NotationFieldValue();
+                fv.setFieldConfigurationId(f.getId());
+                fv.setFieldCode(f.getCode());
+                fv.setFonction(f.getFonction());
+                fv.setFonctiontype(f.getFonctionType());
+                fv.setNotation(notation);
+
+                List<RisqueEntry> risqueEntries;
+
+                boolean isProduitFn = Boolean.TRUE.equals(f.getFonction())
+                        && "Produit".equalsIgnoreCase(f.getFonctionType());
+
+                if (isProduitFn) {
+                    if (backendDtosCache == null) {
+                        backendDtosCache = loadBackendRiskDtosForClientLast12Months(dto.getClientCode());
+                    }
+                    List<RisqueEntryDto> frontDtos = (f.getRisqueValueList() != null) ? f.getRisqueValueList() : Collections.emptyList();
+                    List<RisqueEntryDto> fusion = mergeFrontBackDistinct(frontDtos, backendDtosCache);
+                    risqueEntries = mapToEntities(fusion, fv);
+
+                } else {
+                    // Cas normal: on prend le front, en dédoublonnant
+                    List<RisqueEntryDto> frontDtos = (f.getRisqueValueList() != null) ? f.getRisqueValueList() : Collections.emptyList();
+                    // Dédoublonne via Map
+                    Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+                    for (RisqueEntryDto r : frontDtos) {
+                        if (r != null) unique.put(keyOf(r), r);
+                    }
+                    risqueEntries = mapToEntities(new ArrayList<>(unique.values()), fv);
+                }
+
+                fv.setRisqueValueList(risqueEntries);
+                fieldValues.add(fv);
+            }
+        }
+
+        notation.setFieldValues(fieldValues);
+
+        // Si ProductData présent, rattacher la notation pour cohérence objet (optionnel)
+        productDataOpt.ifPresent(pd -> pd.getNotations().add(notation));
+
+        // Cascade vers FieldValues et RisqueEntries
+        notationRepository.save(notation);
+
+        return notation.getId();
+    }
+
+    @Override
+    public Map<String, Item> mapToListValue(String clientCode) {
+        Map<String, Item> resultMap = new HashMap<>();
+        Optional<ProductData> productDataOpt = productDataRepository.findFirstByRctIdentifierClient(clientCode);
+        if (productDataOpt.isEmpty()) {
+            return resultMap;
+        }
+        ProductData productData = productDataOpt.get();
+        // Attention: cette méthode réduit à un seul Item par client; si besoin, retourner une liste
+        for (Notation n : productData.getNotations()) {
+            for (NotationFieldValue fv : n.getFieldValues()) {
+                for (RisqueEntry re : fv.getRisqueValueList()) {
+                    resultMap.put(productData.getRctIdentifierClient(), re.getRisqueValueItem());
+                }
+            }
+        }
+        return resultMap;
+    }
+
+    @Override
+    public List<RiskPairDto> getUniqueRisks(String clientCode, String productCode) {
+        List<RisqueEntry> entries = risqueEntryRepository.findByClientAndProduct(clientCode, productCode);
+        Map<String, RiskPairDto> unique = new LinkedHashMap<>();
+        for (RisqueEntry e : entries) {
+            Item list = e.getListValueItem();
+            Item risk = e.getRisqueValueItem();
+
+            String listCode = list != null ? list.getCode() : "";
+            String riskCode = risk != null ? risk.getCode() : "";
+            String key = listCode + "|" + riskCode;
+
+            if (!unique.containsKey(key)) {
+                ItemDto listDto = new ItemDto();
+                if (list != null) {
+                    listDto.setCode(list.getCode());
+                    listDto.setLibelle(list.getLibelle());
+                }
+                ItemDto riskDto = new ItemDto();
+                if (risk != null) {
+                    riskDto.setCode(risk.getCode());
+                    riskDto.setLibelle(risk.getLibelle());
+                }
+                unique.put(key, new RiskPairDto(listDto, riskDto));
+            }
+        }
+        return new ArrayList<>(unique.values());
+    }
+}
+
+
+
+
+
 
