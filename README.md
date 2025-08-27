@@ -1273,6 +1273,421 @@ public class NotationServiceImpl implements NotationService {
 }
 
 
+MMMMMMMMMMM
+mMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMm
+package com.sahambank.fccr.core.cash;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sahambank.fccr.core.dto.ItemDto;
+import com.sahambank.fccr.core.dto.NotationDto;
+import com.sahambank.fccr.core.dto.RisqueEntryDto;
+import com.sahambank.fccr.core.entities.Item;
+import com.sahambank.fccr.core.entities.Notation;
+import com.sahambank.fccr.core.entities.NotationFieldValue;
+import com.sahambank.fccr.core.entities.RisqueEntry;
+import com.sahambank.fccr.core.entities.file.ProductData;
+import com.sahambank.fccr.core.mapper.RisqueEntryMapper;
+import com.sahambank.fccr.core.repository.ItemRepository;
+import com.sahambank.fccr.core.repository.NotationRepository;
+import com.sahambank.fccr.core.repository.ProductDataRepository;
+import com.sahambank.fccr.core.repository.RisqueEntryRepository;
+import com.sahambank.fccr.core.service.NotationService;
+import jakarta.annotation.Nullable;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/* ========= 1) DTO de vue pour le GET ========= */
+class NotationFieldViewDto {
+    private Long fieldConfigurationId;
+    private String clientId;
+    private ValueDto value;
+
+    public static class ValueDto {
+        private ItemDto listValueItem;
+        private ItemDto risqueValueItem;
+
+        public ItemDto getListValueItem() { return listValueItem; }
+        public void setListValueItem(ItemDto listValueItem) { this.listValueItem = listValueItem; }
+        public ItemDto getRisqueValueItem() { return risqueValueItem; }
+        public void setRisqueValueItem(ItemDto risqueValueItem) { this.risqueValueItem = risqueValueItem; }
+    }
+
+    public Long getFieldConfigurationId() { return fieldConfigurationId; }
+    public void setFieldConfigurationId(Long fieldConfigurationId) { this.fieldConfigurationId = fieldConfigurationId; }
+    public String getClientId() { return clientId; }
+    public void setClientId(String clientId) { this.clientId = clientId; }
+    public ValueDto getValue() { return value; }
+    public void setValue(ValueDto value) { this.value = value; }
+}
+
+/* ========= 2) Modèle fichier cash + service de moyenne (sans repository) ========= */
+class CashRecord {
+    private String rctIdentifierClient;
+    private String month; // YYYY-MM
+    private BigDecimal amount;
+
+    public String getRctIdentifierClient() { return rctIdentifierClient; }
+    public void setRctIdentifierClient(String rctIdentifierClient) { this.rctIdentifierClient = rctIdentifierClient; }
+    public String getMonth() { return month; }
+    public void setMonth(String month) { this.month = month; }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
+}
+
+@Service
+class CashHistoryService {
+    private final ObjectMapper objectMapper;
+    private final Resource cashResource;
+
+    public CashHistoryService(
+            ObjectMapper objectMapper,
+            @Value("${cash.history.path:classpath:cash_history.json}") Resource cashResource) {
+        this.objectMapper = objectMapper;
+        this.cashResource = cashResource;
+    }
+
+    public Optional<BigDecimal> averageLast12Months(String clientCode) {
+        List<CashRecord> all = readAll();
+        YearMonth now = YearMonth.now();
+        YearMonth since = now.minusMonths(11);
+
+        List<BigDecimal> values = all.stream()
+                .filter(r -> clientCode.equals(r.getRctIdentifierClient()))
+                .map(r -> parseYM(r.getMonth()))
+                .filter(Objects::nonNull)
+                .filter(ym -> !ym.isBefore(since) && !ym.isAfter(now))
+                .map(ym -> findAmount(all, clientCode, ym))
+                .filter(Objects::nonNull)
+                .toList();
+
+        if (values.isEmpty()) return Optional.empty();
+        BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return Optional.of(sum.divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP));
+    }
+
+    private YearMonth parseYM(String s) {
+        try { return YearMonth.parse(s); } catch (Exception e) { return null; }
+    }
+
+    private BigDecimal findAmount(List<CashRecord> all, String client, YearMonth ym) {
+        for (CashRecord r : all) {
+            if (client.equals(r.getRctIdentifierClient()) && ym.toString().equals(r.getMonth())) {
+                return r.getAmount();
+            }
+        }
+        return null;
+    }
+
+    private List<CashRecord> readAll() {
+        try (InputStream is = cashResource.getInputStream()) {
+            CashRecord[] arr = objectMapper.readValue(is, CashRecord[].class);
+            return arr != null ? Arrays.asList(arr) : Collections.emptyList();
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
+    }
+}
+
+/* ========= 3) Implémentation NotationService avec branche cash ========= */
+@Service
+class NotationServiceWithCash implements NotationService {
+
+    private final NotationRepository notationRepository;
+    private final ItemRepository itemRepository;
+    private final ProductDataRepository productDataRepository;
+    private final RisqueEntryRepository risqueEntryRepository;
+    private final RisqueEntryMapper risqueEntryMapper;
+    private final CashHistoryService cashHistoryService;
+
+    public NotationServiceWithCash(NotationRepository notationRepository,
+                                   ItemRepository itemRepository,
+                                   ProductDataRepository productDataRepository,
+                                   RisqueEntryRepository risqueEntryRepository,
+                                   RisqueEntryMapper risqueEntryMapper,
+                                   CashHistoryService cashHistoryService) {
+        this.notationRepository = notationRepository;
+        this.itemRepository = itemRepository;
+        this.productDataRepository = productDataRepository;
+        this.risqueEntryRepository = risqueEntryRepository;
+        this.risqueEntryMapper = risqueEntryMapper;
+        this.cashHistoryService = cashHistoryService;
+    }
+
+    private static boolean isBlank(String s) { return s == null || s.trim().isEmpty(); }
+
+    private Optional<ProductData> resolveOptionalProductData(String clientCode) {
+        String currentMonth = YearMonth.now().toString(); // YYYY-MM
+        return productDataRepository
+                .findByRctIdentifierClientAndCollectMonth(clientCode, currentMonth)
+                .or(() -> productDataRepository.findTopByRctIdentifierClientOrderByCollectMonthDesc(clientCode));
+    }
+
+    private List<RisqueEntryDto> loadBackendRiskDtosForClientLast12Months(String clientCode) {
+        String sinceMonth = YearMonth.now().minusMonths(11).toString();
+        List<ProductData> historiques = productDataRepository.findAllSinceMonth(clientCode, sinceMonth);
+        if (historiques == null || historiques.isEmpty()) {
+            return Collections.emptyList();
+        }
+        List<RisqueEntry> risques = risqueEntryRepository.findFirstByRctIdentifierClient(clientCode);
+        if (risques == null || risques.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return risques.stream()
+                .map(risqueEntryMapper::fromRisqueEntryToDTO)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private String keyOf(RisqueEntryDto r) {
+        String listCode = (r.getListValueItem() != null && r.getListValueItem().getCode() != null)
+                ? r.getListValueItem().getCode() : "";
+        String riskCode = (r.getRisqueValueItem() != null && r.getRisqueValueItem().getCode() != null)
+                ? r.getRisqueValueItem().getCode() : "";
+        return listCode + "|" + riskCode;
+    }
+
+    private List<RisqueEntryDto> mergeFrontBackDistinct(List<RisqueEntryDto> front, List<RisqueEntryDto> back) {
+        Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+        if (back != null) {
+            for (RisqueEntryDto r : back) if (r != null) unique.put(keyOf(r), r);
+        }
+        if (front != null) {
+            for (RisqueEntryDto r : front) if (r != null) unique.putIfAbsent(keyOf(r), r);
+        }
+        return new ArrayList<>(unique.values());
+    }
+
+    private List<RisqueEntry> mapToEntities(List<RisqueEntryDto> dtos, NotationFieldValue fv) {
+        if (dtos == null) return Collections.emptyList();
+        return dtos.stream().map(r -> {
+            RisqueEntry emb = new RisqueEntry();
+            if (r.getListValueItem() != null && !isBlank(r.getListValueItem().getCode())) {
+                emb.setListValueItem(resolveItemByCodeOrCreate(r.getListValueItem().getCode(), r.getListValueItem().getLibelle()));
+            }
+            if (r.getRisqueValueItem() != null && !isBlank(r.getRisqueValueItem().getCode())) {
+                emb.setRisqueValueItem(resolveItemByCodeOrCreate(r.getRisqueValueItem().getCode(), r.getRisqueValueItem().getLibelle()));
+            }
+            emb.setNotationFieldValue(fv);
+            return emb;
+        }).collect(Collectors.toList());
+    }
+
+    private Item resolveItemByCodeOrCreate(String code, String libelle) {
+        return itemRepository.findByCode(code).orElseGet(() -> {
+            Item item = new Item();
+            item.setCode(code);
+            item.setLibelle(libelle);
+            return itemRepository.save(item);
+        });
+    }
+
+    @Transactional
+    @Override
+    public Long save(NotationDto dto) {
+        if (dto == null) throw new IllegalArgumentException("NotationDto is required");
+        if (dto.getSEGMENT() == null || isBlank(dto.getSEGMENT().getCode()))
+            throw new IllegalArgumentException("SEGMENT and SEGMENT.code are required");
+        if (isBlank(dto.getClientCode()))
+            throw new IllegalArgumentException("clientCode is required");
+
+        Optional<ProductData> productDataOpt = resolveOptionalProductData(dto.getClientCode());
+
+        Notation notation = new Notation();
+        notation.setSegmentCode(dto.getSEGMENT().getCode());
+        notation.setClientCode(dto.getClientCode());
+        notation.setProductData(productDataOpt.orElse(null));
+
+        List<NotationFieldValue> fieldValues = new ArrayList<>();
+
+        if (dto.getFieldConfigurations() != null) {
+            List<RisqueEntryDto> backendProduitCache = null;
+            Optional<BigDecimal> cashAvgOpt = null;
+
+            for (var f : dto.getFieldConfigurations()) {
+                if (f == null) continue;
+
+                NotationFieldValue fv = new NotationFieldValue();
+                fv.setFieldConfigurationId(f.getId());
+                fv.setFieldCode(f.getCode());
+                fv.setFonction(f.getFonction());
+                fv.setFonctiontype(f.getFonctionType());
+                fv.setNotation(notation);
+
+                List<RisqueEntry> risqueEntries;
+
+                boolean isProduitFn = Boolean.TRUE.equals(f.getFonction())
+                        && "Produit".equalsIgnoreCase(f.getFonctionType());
+                boolean isCashFn = Boolean.TRUE.equals(f.getFonction())
+                        && "cash".equalsIgnoreCase(f.getFonctionType());
+
+                if (isProduitFn) {
+                    if (backendProduitCache == null) {
+                        backendProduitCache = loadBackendRiskDtosForClientLast12Months(dto.getClientCode());
+                    }
+                    List<RisqueEntryDto> frontDtos = (f.getRisqueValueList() != null) ? f.getRisqueValueList() : Collections.emptyList();
+                    List<RisqueEntryDto> fusion = mergeFrontBackDistinct(frontDtos, backendProduitCache);
+                    risqueEntries = mapToEntities(fusion, fv);
+
+                } else if (isCashFn) {
+                    if (cashAvgOpt == null) {
+                        cashAvgOpt = cashHistoryService.averageLast12Months(dto.getClientCode());
+                    }
+                    List<RisqueEntryDto> cashDtos = cashAvgOpt
+                            .map(avg -> {
+                                RisqueEntryDto r = new RisqueEntryDto();
+                                ItemDto list = new ItemDto();
+                                list.setCode("CASH_AVG");
+                                list.setLibelle("Cash Average 12m");
+                                ItemDto risk = new ItemDto();
+                                risk.setCode(avg.toPlainString());
+                                risk.setLibelle(avg.toPlainString());
+                                r.setListValueItem(list);
+                                r.setRisqueValueItem(risk);
+                                return List.of(r);
+                            })
+                            .orElseGet(Collections::emptyList);
+
+                    List<RisqueEntryDto> frontDtos = (f.getRisqueValueList() != null) ? f.getRisqueValueList() : Collections.emptyList();
+                    List<RisqueEntryDto> fusion = mergeFrontBackDistinct(frontDtos, cashDtos);
+                    risqueEntries = mapToEntities(fusion, fv);
+
+                } else {
+                    List<RisqueEntryDto> frontDtos = (f.getRisqueValueList() != null) ? f.getRisqueValueList() : Collections.emptyList();
+                    Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+                    for (RisqueEntryDto r : frontDtos) {
+                        if (r != null) unique.put(keyOf(r), r);
+                    }
+                    risqueEntries = mapToEntities(new ArrayList<>(unique.values()), fv);
+                }
+
+                fv.setRisqueValueList(risqueEntries);
+                fieldValues.add(fv);
+            }
+        }
+
+        notation.setFieldValues(fieldValues);
+        productDataOpt.ifPresent(pd -> pd.getNotations().add(notation));
+        notationRepository.save(notation);
+        return notation.getId();
+    }
+
+    @Override
+    public Map<String, Item> mapToListValue(String clientCode) {
+        Map<String, Item> resultMap = new HashMap<>();
+        Optional<ProductData> productDataOpt = productDataRepository.findFirstByRctIdentifierClient(clientCode);
+        if (productDataOpt.isEmpty()) return resultMap;
+        ProductData productData = productDataOpt.get();
+        for (Notation n : productData.getNotations()) {
+            for (NotationFieldValue fv : n.getFieldValues()) {
+                for (RisqueEntry re : fv.getRisqueValueList()) {
+                    resultMap.put(productData.getRctIdentifierClient(), re.getRisqueValueItem());
+                }
+            }
+        }
+        return resultMap;
+    }
+
+    @Override
+    public List<RiskPairDto> getUniqueRisks(String clientCode, String productCode) {
+        List<RisqueEntry> entries = risqueEntryRepository.findByClientAndProduct(clientCode, productCode);
+        Map<String, RiskPairDto> unique = new LinkedHashMap<>();
+        for (RisqueEntry e : entries) {
+            Item list = e.getListValueItem();
+            Item risk = e.getRisqueValueItem();
+
+            String listCode = list != null ? list.getCode() : "";
+            String riskCode = risk != null ? risk.getCode() : "";
+            String key = listCode + "|" + riskCode;
+
+            if (!unique.containsKey(key)) {
+                ItemDto listDto = new ItemDto();
+                if (list != null) {
+                    listDto.setCode(list.getCode());
+                    listDto.setLibelle(list.getLibelle());
+                }
+                ItemDto riskDto = new ItemDto();
+                if (risk != null) {
+                    riskDto.setCode(risk.getCode());
+                    riskDto.setLibelle(risk.getLibelle());
+                }
+                unique.put(key, new RiskPairDto(listDto, riskDto));
+            }
+        }
+        return new ArrayList<>(unique.values());
+    }
+
+    /* ===== GET de vue: renvoie fieldConfigurationId, clientId, value(listValueItem, risqueValueItem) ===== */
+    public List<NotationFieldViewDto> getFieldViews(String clientCode, @Nullable String productCode) {
+        List<RisqueEntry> entries = risqueEntryRepository.findByClientAndProduct(clientCode, productCode);
+        List<NotationFieldViewDto> result = new ArrayList<>();
+        for (RisqueEntry e : entries) {
+            NotationFieldValue fv = e.getNotationFieldValue();
+            Notation n = fv.getNotation();
+
+            NotationFieldViewDto dto = new NotationFieldViewDto();
+            dto.setFieldConfigurationId(fv.getFieldConfigurationId());
+            dto.setClientId(n.getClientCode());
+
+            NotationFieldViewDto.ValueDto val = new NotationFieldViewDto.ValueDto();
+
+            Item list = e.getListValueItem();
+            Item risk = e.getRisqueValueItem();
+
+            ItemDto listDto = new ItemDto();
+            if (list != null) {
+                listDto.setCode(list.getCode());
+                listDto.setLibelle(list.getLibelle());
+            }
+            ItemDto riskDto = new ItemDto();
+            if (risk != null) {
+                riskDto.setCode(risk.getCode());
+                riskDto.setLibelle(risk.getLibelle());
+            }
+            val.setListValueItem(listDto);
+            val.setRisqueValueItem(riskDto);
+
+            dto.setValue(val);
+            result.add(dto);
+        }
+        return result;
+    }
+}
+
+/* ========= 4) Contrôleur REST minimal ========= */
+@RestController
+@RequestMapping("/api/notations")
+class NotationController {
+    private final NotationServiceWithCash service;
+
+    public NotationController(NotationServiceWithCash service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<Long> save(@RequestBody NotationDto dto) {
+        Long id = service.save(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(id);
+    }
+
+    @GetMapping("/{clientCode}/fields")
+    public List<NotationFieldViewDto> getFieldViews(@PathVariable String clientCode,
+                                                    @RequestParam(required = false) String productCode) {
+        return service.getFieldViews(clientCode, productCode);
+    }
+}
 
 
 
