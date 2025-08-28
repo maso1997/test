@@ -1,5 +1,385 @@
 
+{"rctIdentifierClient":"ABM1896","customerLocalization":"MA","localIdentifierClient":"000297827","localDatabaseName":"SGMA","transactionFamily":"AUTOMATIC_CASH_TRANSFER","transactionNumber":6,"countryCodes":["MA","MA"],"transactionCurrency":"EUR","amount":1055477.75,"issuingApplicationCode":"BISMEMAR_BNKFCCR","collectMonth":"2025-05"}
 
+package com.sahambank.fccr.core.repository;
+
+import com.sahambank.fccr.core.entities.file.TransactionData;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface TransactionDataRepository extends JpaRepository<TransactionData, Long> {
+    List<TransactionData> findByRctIdentifierClientAndTransactionFamily
+            (String rctIdentifierClient, String transactionFamily);
+
+    Optional<TransactionData> findFirstByRctIdentifierClient(String rctIdentifierClient);
+
+    List<TransactionData> findByRctIdentifierClient(String rctIdentifierClient);
+}
+
+package com.sahambank.fccr.core.service.Impl;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sahambank.fccr.core.entities.file.TransactionData;
+import com.sahambank.fccr.core.repository.TransactionDataRepository;
+import com.sahambank.fccr.core.service.ICashImportStrategyService;
+import com.sahambank.fccr.core.util.AppProperties;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+
+import java.io.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Paths;
+import java.time.YearMonth;
+import java.util.*;
+
+@Service
+@AllArgsConstructor
+@Slf4j
+public class CashImportStrategyImpl implements ICashImportStrategyService {
+
+    private final ObjectMapper objectMapper;
+    private final TransactionDataRepository transactionDataRepository;
+    private final AppProperties appProperties;
+
+    @Override
+    public void importFile(String path, String type) throws IOException {
+        String fullPath = Paths.get(appProperties.getDataFolder(), path).toString();
+        File file = new File(fullPath);
+
+        if (!file.exists()) {
+            throw new FileNotFoundException("Fichier introuvable : " + fullPath);
+        }
+
+        log.info("Import du fichier Cash : {}", fullPath);
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (!StringUtils.hasText(line)) {
+                    continue; // ignore lignes vides
+                }
+                try {
+                    TransactionData incoming = objectMapper.readValue(line, TransactionData.class);
+
+                    if (!StringUtils.hasText(incoming.getRctIdentifierClient())) {
+                        throw new IllegalArgumentException("rctIdentifierClient manquant dans la ligne : " + line);
+                    }
+
+                    TransactionData transaction = transactionDataRepository
+                            .findFirstByRctIdentifierClient(incoming.getRctIdentifierClient())
+                            .map(existing -> {
+                                existing.setCustomerLocalization(incoming.getCustomerLocalization());
+                                existing.setLocalIdentifierClient(incoming.getLocalIdentifierClient());
+                                existing.setLocalDatabaseName(incoming.getLocalDatabaseName());
+                                existing.setTransactionFamily(incoming.getTransactionFamily());
+                                existing.setTransactionNumber(incoming.getTransactionNumber());
+                                existing.setCountryCodes(incoming.getCountryCodes());
+                                existing.setTransactionCurrency(incoming.getTransactionCurrency());
+                                existing.setAmount(incoming.getAmount());
+                                existing.setIssuingApplicationCode(incoming.getIssuingApplicationCode());
+                                existing.setCollectMonth(incoming.getCollectMonth());
+                                return existing;
+                            })
+                            .orElse(incoming);
+
+                    transactionDataRepository.save(transaction);
+                    log.debug("Transaction importée : {}", transaction);
+
+                } catch (IOException | IllegalArgumentException e) {
+                    log.warn("Ligne ignorée car invalide : {}", line, e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public String getType() {
+        return "Cash";
+    }
+
+    @Override
+    public Optional<BigDecimal> averageLast12Months(String clientCode) {
+        List<TransactionData> all = transactionDataRepository.findByRctIdentifierClient(clientCode);
+        if (all.isEmpty()) return Optional.empty();
+
+        YearMonth now = YearMonth.now();
+        YearMonth since = now.minusMonths(11);
+
+        List<BigDecimal> values = all.stream()
+                .filter(r -> {
+                    YearMonth ym = parseYM(r.getCollectMonth());
+                    return ym != null && !ym.isBefore(since) && !ym.isAfter(now);
+                })
+                .map(TransactionData::getAmount)
+                .filter(Objects::nonNull)
+                .map(BigDecimal::valueOf)
+                .toList();
+
+        if (values.isEmpty()) return Optional.empty();
+
+        BigDecimal sum = values.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return Optional.of(sum.divide(BigDecimal.valueOf(values.size()), 2, RoundingMode.HALF_UP));
+    }
+
+    private YearMonth parseYM(String s) {
+        if (!StringUtils.hasText(s)) {
+            return null;
+        }
+        try {
+            return YearMonth.parse(s);
+        } catch (Exception e) {
+            log.warn("Impossible de parser la date '{}'", s);
+            return null;
+        }
+    }
+}
+
+llllllll
+
+package com.sahambank.fccr.core.service.Impl;
+
+import com.sahambank.fccr.core.dto.*;
+import com.sahambank.fccr.core.entities.*;
+import com.sahambank.fccr.core.entities.file.ProductData;
+import com.sahambank.fccr.core.mapper.RisqueEntryMapper;
+import com.sahambank.fccr.core.repository.*;
+import com.sahambank.fccr.core.service.NotationService;
+import jakarta.transaction.Transactional;
+import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.util.*;
+import java.util.stream.Collectors;
+
+@Service
+public class NotationServiceImpl implements NotationService {
+
+    private final NotationRepository notationRepository;
+    private final ItemRepository itemRepository;
+    private final ProductDataRepository productDataRepository;
+    private final RisqueEntryRepository risqueEntryRepository;
+    private final RisqueEntryMapper risqueEntryMapper;
+    private final CashImportStrategyImpl cashImportStrategy;
+
+    public NotationServiceImpl(NotationRepository notationRepository,
+                               ItemRepository itemRepository,
+                               ProductDataRepository productDataRepository,
+                               RisqueEntryRepository risqueEntryRepository,
+                               RisqueEntryMapper risqueEntryMapper,
+                               CashImportStrategyImpl cashImportStrategy) {
+        this.notationRepository = notationRepository;
+        this.itemRepository = itemRepository;
+        this.productDataRepository = productDataRepository;
+        this.risqueEntryRepository = risqueEntryRepository;
+        this.risqueEntryMapper = risqueEntryMapper;
+        this.cashImportStrategy = cashImportStrategy;
+    }
+
+    private static boolean isBlank(String s) {
+        return s == null || s.trim().isEmpty();
+    }
+
+    private Optional<ProductData> resolveOptionalProductData(String clientCode) {
+        String currentMonth = YearMonth.now().toString();
+        return productDataRepository
+                .findByRctIdentifierClientAndCollectMonth(clientCode, currentMonth)
+                .or(() -> productDataRepository.findTopByRctIdentifierClientOrderByCollectMonthDesc(clientCode));
+    }
+
+    private List<RisqueEntryDto> loadBackendRiskDtosForClientLast12Months(String clientCode) {
+        String sinceMonth = YearMonth.now().minusMonths(11).toString();
+        List<ProductData> historiques = productDataRepository.findAllSinceMonth(clientCode, sinceMonth);
+        if (historiques == null || historiques.isEmpty()) return Collections.emptyList();
+
+        List<RisqueEntry> risques = risqueEntryRepository.findFirstByRctIdentifierClient(clientCode);
+        if (risques == null || risques.isEmpty()) return Collections.emptyList();
+
+        return risques.stream()
+                .map(risqueEntryMapper::fromRisqueEntryToDTO)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private String keyOf(RisqueEntryDto r) {
+        String listCode = (r.getListValueItem() != null && r.getListValueItem().getCode() != null)
+                ? r.getListValueItem().getCode() : "";
+        String riskCode = (r.getRisqueValueItem() != null && r.getRisqueValueItem().getCode() != null)
+                ? r.getRisqueValueItem().getCode() : "";
+        return listCode + "|" + riskCode;
+    }
+
+    private List<RisqueEntryDto> mergeFrontBackDistinct(List<RisqueEntryDto> front, List<RisqueEntryDto> back) {
+        Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+        if (back != null) for (RisqueEntryDto r : back) if (r != null) unique.put(keyOf(r), r);
+        if (front != null) for (RisqueEntryDto r : front) if (r != null) unique.putIfAbsent(keyOf(r), r);
+        return new ArrayList<>(unique.values());
+    }
+
+    private List<RisqueEntry> mapToEntities(List<RisqueEntryDto> dtos, NotationFieldValue fv) {
+        if (dtos == null) return Collections.emptyList();
+        return dtos.stream().map(r -> {
+            RisqueEntry emb = new RisqueEntry();
+            if (r.getListValueItem() != null && !isBlank(r.getListValueItem().getCode())) {
+                emb.setListValueItem(resolveItemByCodeOrCreate(r.getListValueItem().getCode(), r.getListValueItem().getLibelle()));
+            }
+            if (r.getRisqueValueItem() != null && !isBlank(r.getRisqueValueItem().getCode())) {
+                emb.setRisqueValueItem(resolveItemByCodeOrCreate(r.getRisqueValueItem().getCode(), r.getRisqueValueItem().getLibelle()));
+            }
+            emb.setNotationFieldValue(fv);
+            return emb;
+        }).collect(Collectors.toList());
+    }
+
+    private Item resolveItemByCodeOrCreate(String code, String libelle) {
+        return itemRepository.findByCode(code).orElseGet(() -> {
+            Item item = new Item();
+            item.setCode(code);
+            item.setLibelle(libelle);
+            return itemRepository.save(item);
+        });
+    }
+
+    @Transactional
+    @Override
+    public Long save(NotationDto dto) {
+        if (dto == null) throw new IllegalArgumentException("NotationDto is required");
+        if (dto.getSEGMENT() == null || isBlank(dto.getSEGMENT().getCode()))
+            throw new IllegalArgumentException("SEGMENT and SEGMENT.code are required");
+        if (isBlank(dto.getClientCode()))
+            throw new IllegalArgumentException("clientCode is required");
+
+        Optional<ProductData> productDataOpt = resolveOptionalProductData(dto.getClientCode());
+
+        Notation notation = new Notation();
+        notation.setSegmentCode(dto.getSEGMENT().getCode());
+        notation.setClientCode(dto.getClientCode());
+        notation.setProductData(productDataOpt.orElse(null));
+
+        List<NotationFieldValue> fieldValues = new ArrayList<>();
+        List<RisqueEntryDto> backendDtosCache = null;
+
+        if (dto.getFieldConfigurations() != null) {
+            for (FiledValueDto f : dto.getFieldConfigurations()) {
+                if (f == null) continue;
+
+                NotationFieldValue fv = new NotationFieldValue();
+                fv.setFieldConfigurationId(f.getId());
+                fv.setFieldCode(f.getCode());
+                fv.setFonction(f.getFonction());
+                fv.setFonctiontype(f.getFonctionType());
+                fv.setNotation(notation);
+
+                List<RisqueEntry> risqueEntries;
+
+                boolean isProduitFn = Boolean.TRUE.equals(f.getFonction())
+                        && "Produit".equalsIgnoreCase(f.getFonctionType());
+
+                boolean isCashFn = Boolean.TRUE.equals(f.getFonction())
+                        && "Cash".equalsIgnoreCase(f.getFonctionType());
+
+                if (isProduitFn) {
+                    if (backendDtosCache == null) {
+                        backendDtosCache = loadBackendRiskDtosForClientLast12Months(dto.getClientCode());
+                    }
+                    List<RisqueEntryDto> frontDtos = f.getRisqueValueList() != null ? f.getRisqueValueList() : Collections.emptyList();
+                    List<RisqueEntryDto> fusion = mergeFrontBackDistinct(frontDtos, backendDtosCache);
+                    risqueEntries = mapToEntities(fusion, fv);
+
+                } else if (isCashFn) {
+                    BigDecimal moyenne = cashImportStrategy
+                            .averageLast12Months(dto.getClientCode())
+                            .orElse(BigDecimal.ZERO);
+
+                    RisqueEntryDto cashDto = new RisqueEntryDto();
+                    ItemDto listDto = new ItemDto();
+                    listDto.setCode("CASH_AVG");
+                    listDto.setLibelle("Moyenne cash 12 mois");
+                    ItemDto riskDto = new ItemDto();
+                    riskDto.setCode(moyenne.toPlainString());
+                    riskDto.setLibelle(moyenne.toPlainString());
+                    cashDto.setListValueItem(listDto);
+                    cashDto.setRisqueValueItem(riskDto);
+
+                    risqueEntries = mapToEntities(Collections.singletonList(cashDto), fv);
+
+                } else {
+                    List<RisqueEntryDto> frontDtos = f.getRisqueValueList() != null ? f.getRisqueValueList() : Collections.emptyList();
+                    Map<String, RisqueEntryDto> unique = new LinkedHashMap<>();
+                    for (RisqueEntryDto r : frontDtos) if (r != null) unique.put(keyOf(r), r);
+                    risqueEntries = mapToEntities(new ArrayList<>(unique.values()), fv);
+                }
+
+                fv.setRisqueValueList(risqueEntries);
+                fieldValues.add(fv);
+            }
+        }
+
+        notation.setFieldValues(fieldValues);
+        productDataOpt.ifPresent(pd -> pd.getNotations().add(notation));
+        notationRepository.save(notation);
+
+        return notation.getId();
+    }
+
+    @Override
+    public Map<String, Item> mapToListValue(String clientCode) {
+        Map<String, Item> resultMap = new HashMap<>();
+        Optional<ProductData> productDataOpt = productDataRepository.findFirstByRctIdentifierClient(clientCode);
+        if (productDataOpt.isEmpty()) {
+            return resultMap;
+        }
+        ProductData productData = productDataOpt.get();
+        for (Notation n : productData.getNotations()) {
+            for (NotationFieldValue fv : n.getFieldValues()) {
+                for (RisqueEntry re : fv.getRisqueValueList()) {
+                    resultMap.put(productData.getRctIdentifierClient(), re.getRisqueValueItem());
+                }
+            }
+        }
+        return resultMap;
+    }
+
+    @Override
+    public List<RiskPairDto> getUniqueRisks(String clientCode, String productCode) {
+        List<RisqueEntry> entries = risqueEntryRepository.findByClientAndProduct(clientCode, productCode);
+        Map<String, RiskPairDto> unique = new LinkedHashMap<>();
+
+        for (RisqueEntry e : entries) {
+            Item list = e.getListValueItem();
+            Item risk = e.getRisqueValueItem();
+
+            String listCode = list != null ? list.getCode() : "";
+            String riskCode = risk != null ? risk.getCode() : "";
+            String key = listCode + "|" + riskCode;
+
+            if (!unique.containsKey(key)) {
+                ItemDto listDto = new ItemDto();
+                if (list != null) {
+                    listDto.setCode(list.getCode());
+                    listDto.setLibelle(list.getLibelle());
+                }
+                ItemDto riskDto = new ItemDto();
+                if (risk != null) {
+                    riskDto.setCode(risk.getCode());
+                    riskDto.setLibelle(risk.getLibelle());
+                }
+                unique.put(key, new RiskPairDto(listDto, riskDto));
+            }
+        }
+        return new ArrayList<>(unique.values());
+    }
+
+
+}
+
+save ok 
 package com.sahambank.fccr.core.service.Impl;
 
 import com.sahambank.fccr.core.dto.*;
